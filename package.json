@@ -1,0 +1,17 @@
+{
+  "name": "coal_site-by-site_map",
+  "version": "1.0.0",
+  "description": "display planned coal plant sites on a map ",
+  "main": "index.js",
+  "repository": "git@github.com:junipertcy/coal_site-by-site_map.git",
+  "author": "Tzu-Chi Yen <junipertcy@gmail.com>",
+  "license": "MIT",
+  "private": false,
+  "dependencies": {
+    "@mapbox/leaflet-omnivore": "^0.3.4",
+    "d3": "^4.13.0",
+    "leaflet": "^1.3.1",
+    "lodash": "^4.17.4",
+    "mapbox-gl": "^0.44.0"
+  }
+}

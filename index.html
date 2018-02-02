@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8'/>
+    <title>Create a time slider</title>
+    <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no'/>
+    <script src='node_modules/mapbox-gl/dist/mapbox-gl.js'></script>
+    <script src="node_modules/leaflet/dist/leaflet.js"></script>
+    <script src="node_modules/lodash/lodash.min.js"></script>
+    <!--<script src="node_modules/torque.js/dist/torque.full.uncompressed.js"></script>-->
+    <!--<script src='node_modules/@mapbox/togeojson/togeojson.js'></script>-->
+    <!--<script src='node_modules/togeojson-with-extended-style/togeojson.js'></script>-->
+    <!--<script src='node_modules/jquery/dist/jquery.min.js'></script>-->
+    <!--<script src='node_modules/gtran-kml/src/script.js'></script>-->
+    <script src='node_modules/@mapbox/leaflet-omnivore/leaflet-omnivore.min.js'></script>
+
+
+    <link href='node_modules/leaflet/dist/leaflet.css' rel='stylesheet'/>
+    <link href='node_modules/mapbox-gl/dist/mapbox-gl.css' rel='stylesheet'/>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+        }
+
+        #map {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 100%;
+        }
+
+    </style>
+</head>
+<body>
+
+<style>
+    .map-overlay {
+        font: 12px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;
+        position: absolute;
+        width: 25%;
+        top: 0;
+        left: 0;
+        padding: 10px;
+    }
+
+    .map-overlay .map-overlay-inner {
+        background-color: #FF4136;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.20);
+        border-radius: 3px;
+        padding: 10px;
+        margin-bottom: 10px;
+    }
+
+    .map-overlay h2 {
+        line-height: 24px;
+        display: block;
+        margin: 0 0 10px;
+    }
+
+    .map-overlay .legend .bar {
+        height: 10px;
+        width: 100%;
+        background: linear-gradient(to right, #FCA107, #7F3121);
+    }
+
+    .map-overlay input {
+        background-color: transparent;
+        display: inline-block;
+        width: 100%;
+        position: relative;
+        margin: 0;
+        cursor: ew-resize;
+    }
+</style>
+
+
+<div id='map'></div>
+
+<script src='node_modules/d3/build/d3.min.js' charset='utf-8'></script>
+<script>
+
+    var months = [
+        'January',
+        'February',
+        'March',
+        'April',
+        'May',
+        'June',
+        'July',
+        'August',
+        'September',
+        'October',
+        'November',
+        'December'
+    ];
+
+    function filterBy(month) {
+
+        var filters = ['==', 'month', month];
+        map.setFilter('pollution-polygons', filters);
+        // map.setFilter('earthquake-labels', filters);
+
+        // Set the label to the month
+        document.getElementById('month').textContent = months[month];
+    }
+
+    mapboxgl.accessToken = 'pk.eyJ1IjoianVuaXBlcnRjeSIsImEiOiJvOFg5WFVjIn0.7NDB1oOLpq3A5qO7vLaQSA';
+    var map = new mapboxgl.Map({
+        container: 'map',
+        zoomControl: true,
+        style: 'mapbox://styles/mapbox/light-v9',
+        center: [137.686, 36.191],
+        zoom: 7
+    });
+
+    // L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    //     attribution: 'OpenStreet | Greenpeace'
+    // }).addTo(map);
+
+    omnivore.kml('dataset/demo/japan30_no2_concentration_monthly.kml').on('ready', function (d) {
+        ls = d.target.getLayers();
+        // var h = _.filter(ls, function (o) {
+        //     try {
+        //         var date = new Date(o.feature.properties.timespan.end);
+        //         return date.getMonth() === 10;
+        //     } catch (err) {
+        //         console.log(err);
+        //     }
+        // });
+
+        for (var i = 0; i < ls.length; ++i) {
+            try {
+                var dd = ls[i].feature;
+                var c_ = [];
+                dd.geometry.coordinates[0].forEach(function (o) {
+                    var dropped = _.dropRight(o, 1);
+                    c_.push(dropped);
+                });
+                ls[i].feature.geometry.coordinates[0] = c_;
+            } catch (e) {
+                console.log(ls[i]);
+                if (ls[i].feature.geometry.type === "Point") {
+                    ls[i].feature.geometry.coordinates = ls[i].feature.geometry.coordinates.slice(0, 2);
+                }
+            }
+        }
+        var pre_data = _.map(ls, 'feature');
+        // console.log(pre_data);
+        pre_data = pre_data.map(function(d) {
+            try {
+                d.properties.month = new Date(d.properties.timespan.end).getMonth();
+                if (d.properties.month === 0) {
+                    d.properties.month = 11;
+                } else {
+                    d.properties.month -= 1;
+                }
+            } catch (e) {
+                d.properties.month = 12;  // always present
+            }
+            return d;
+        });
+
+
+
+        map.addSource('pollutions', {
+            'type': 'geojson',
+            'data': {
+                "type": "FeatureCollection",
+                "features": _.map(ls, 'feature')
+            }
+        });
+        console.log(_.map(ls, 'feature'));
+        map.addLayer({
+            'id': 'pollution-polygons',
+            'type': 'fill',
+            'source': 'pollutions',
+            'paint': {
+                'fill-color': "red",
+                'fill-opacity': 0.1
+
+            }
+        });
+        filterBy(0);  // January
+        document.getElementById('slider').addEventListener('input', function(e) {
+            // console.log(e.target.value);
+            var month = parseInt(e.target.value);
+            filterBy(month);
+        });
+
+        // map.fitBounds(runLayer.getBounds());
+    });
+
+</script>
+
+<div class='map-overlay top' style="z-index: 1000; padding-left: 70px;">
+    <div class='map-overlay-inner'>
+        <h2>Significant pollutant spread in 2014</h2>
+        <label id='month'></label>
+        <input id='slider' type='range' min='0' max='11' step='1' value='0'/>
+    </div>
+    <!--<div class='map-overlay-inner'>-->
+        <!--<div id='legend' class='legend'>-->
+            <!--<div class='bar'></div>-->
+            <!--<div>Magnitude (m)</div>-->
+        <!--</div>-->
+    <!--</div>-->
+</div>
+
+</body>
+</html>
