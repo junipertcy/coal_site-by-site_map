@@ -2,82 +2,52 @@
 <html>
 <head>
     <meta charset='utf-8'/>
-    <title>Create a time slider</title>
+    <title>Japan coal site-by-site map</title>
     <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no'/>
-    <script src='node_modules/mapbox-gl/dist/mapbox-gl.js'></script>
+
     <script src="node_modules/leaflet/dist/leaflet.js"></script>
     <script src="node_modules/lodash/lodash.min.js"></script>
-    <!--<script src="node_modules/torque.js/dist/torque.full.uncompressed.js"></script>-->
-    <!--<script src='node_modules/@mapbox/togeojson/togeojson.js'></script>-->
-    <!--<script src='node_modules/togeojson-with-extended-style/togeojson.js'></script>-->
-    <!--<script src='node_modules/jquery/dist/jquery.min.js'></script>-->
-    <!--<script src='node_modules/gtran-kml/src/script.js'></script>-->
+
     <script src='node_modules/@mapbox/leaflet-omnivore/leaflet-omnivore.min.js'></script>
 
-
+    <link href='assets/css/map.css' rel='stylesheet'/>
+    <link href='assets/css/icons.css' rel='stylesheet'/>
+    <link href='assets/css/layout.css' rel='stylesheet'/>
     <link href='node_modules/leaflet/dist/leaflet.css' rel='stylesheet'/>
+
+    <script src="assets/js/map_operations.js"></script>
+    <script src='node_modules/mapbox-gl/dist/mapbox-gl.js'></script>
     <link href='node_modules/mapbox-gl/dist/mapbox-gl.css' rel='stylesheet'/>
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-        }
+    <script src='assets/js/mapbox-gl-language.js'></script>
+    <script src='assets/js/coal_plant_listings.js'></script>
 
-        #map {
-            position: absolute;
-            top: 0;
-            bottom: 0;
-            width: 100%;
-        }
-
-    </style>
 </head>
 <body>
 
-<style>
-    .map-overlay {
-        font: 12px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;
-        position: absolute;
-        width: 25%;
-        top: 0;
-        left: 0;
-        padding: 10px;
-    }
+<div class='sidebar'>
+    <div class='heading'>
+        <h1>Plant locations</h1>
+    </div>
+    <div id='listings' class='listings'></div>
+</div>
 
-    .map-overlay .map-overlay-inner {
-        background-color: #FF4136;
-        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.20);
-        border-radius: 3px;
-        padding: 10px;
-        margin-bottom: 10px;
-    }
+<div id='map' class="map pad2">
+    <div class="mapbox-attribution-container">
+        <a href="https://www.mapbox.com/about/maps/">© Mapbox | </a>
+        <a href="http://www.openstreetmap.org/copyright">© OpenStreetMap | </a>
+        <a href="" target="_blank"><strong>Improve this map</strong></a>
+    </div>
+</div>
 
-    .map-overlay h2 {
-        line-height: 24px;
-        display: block;
-        margin: 0 0 10px;
-    }
+<div class='map-overlay' style="z-index: 1001; margin-left: 300px; width: 400px;">
+    <div class='map-overlay-inner'>
 
-    .map-overlay .legend .bar {
-        height: 10px;
-        width: 100%;
-        background: linear-gradient(to right, #FCA107, #7F3121);
-    }
+        <h2>Significant pollutant spread in 2014</h2>
+        <label id='month'></label>
+        <input id='slider' type='range' min='0' max='11' step='1' value='0'/>
+    </div>
+</div>
 
-    .map-overlay input {
-        background-color: transparent;
-        display: inline-block;
-        width: 100%;
-        position: relative;
-        margin: 0;
-        cursor: ew-resize;
-    }
-</style>
-
-
-<div id='map'></div>
-
-<script src='node_modules/d3/build/d3.min.js' charset='utf-8'></script>
 <script>
 
     var months = [
@@ -105,29 +75,41 @@
         document.getElementById('month').textContent = months[month];
     }
 
+    var style = {
+        "version": 8,
+        "sources": {
+            "simple-tiles": {
+                "type": "raster",
+                "tiles": [
+                    "http://a.tile.openstreetmap.org/{z}/{x}/{y}.png",
+                    "http://b.tile.openstreetmap.org/{z}/{x}/{y}.png",
+                    "http://c.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                ],
+                "tileSize": 256
+            }
+        },
+        "layers": [{
+            "id": "simple-tiles",
+            "type": "raster",
+            "source": "simple-tiles",
+            "minzoom": 0,
+            "maxzoom": 22
+        }]
+    };
+
     mapboxgl.accessToken = 'pk.eyJ1IjoianVuaXBlcnRjeSIsImEiOiJvOFg5WFVjIn0.7NDB1oOLpq3A5qO7vLaQSA';
+
     var map = new mapboxgl.Map({
         container: 'map',
         zoomControl: true,
-        style: 'mapbox://styles/mapbox/light-v9',
-        center: [137.686, 36.191],
-        zoom: 7
+        style: style,
+        center: [139.982, 35.4744],
+        zoom: 6
     });
 
-    // L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    //     attribution: 'OpenStreet | Greenpeace'
-    // }).addTo(map);
 
     omnivore.kml('dataset/demo/japan30_no2_concentration_monthly.kml').on('ready', function (d) {
         ls = d.target.getLayers();
-        // var h = _.filter(ls, function (o) {
-        //     try {
-        //         var date = new Date(o.feature.properties.timespan.end);
-        //         return date.getMonth() === 10;
-        //     } catch (err) {
-        //         console.log(err);
-        //     }
-        // });
 
         for (var i = 0; i < ls.length; ++i) {
             try {
@@ -139,15 +121,14 @@
                 });
                 ls[i].feature.geometry.coordinates[0] = c_;
             } catch (e) {
-                console.log(ls[i]);
                 if (ls[i].feature.geometry.type === "Point") {
                     ls[i].feature.geometry.coordinates = ls[i].feature.geometry.coordinates.slice(0, 2);
                 }
             }
         }
         var pre_data = _.map(ls, 'feature');
-        // console.log(pre_data);
-        pre_data = pre_data.map(function(d) {
+
+        pre_data.map(function (d) {
             try {
                 d.properties.month = new Date(d.properties.timespan.end).getMonth();
                 if (d.properties.month === 0) {
@@ -161,8 +142,7 @@
             return d;
         });
 
-
-
+        console.log(pre_data);
         map.addSource('pollutions', {
             'type': 'geojson',
             'data': {
@@ -170,7 +150,7 @@
                 "features": _.map(ls, 'feature')
             }
         });
-        console.log(_.map(ls, 'feature'));
+
         map.addLayer({
             'id': 'pollution-polygons',
             'type': 'fill',
@@ -181,31 +161,34 @@
 
             }
         });
+
+        // map.setGeoJSONSourceData()
+
+        // var myLayer = mapboxgl.featureLayer().setGeoJSON(plants).addTo(map);
+        plants.features.forEach(function (marker) {
+            // create a HTML element for each feature
+            var el = document.createElement('div');
+            el.className = 'marker';
+
+            // make a marker for each feature and add to the map
+            new mapboxgl.Marker(el)
+                .setLngLat(marker.geometry.coordinates)
+                .addTo(map);
+        });
+
+
+        buildLocationList(plants);
         filterBy(0);  // January
-        document.getElementById('slider').addEventListener('input', function(e) {
-            // console.log(e.target.value);
+
+        document.getElementById('slider').addEventListener('input', function (e) {
+
             var month = parseInt(e.target.value);
             filterBy(month);
         });
-
-        // map.fitBounds(runLayer.getBounds());
     });
 
 </script>
 
-<div class='map-overlay top' style="z-index: 1000; padding-left: 70px;">
-    <div class='map-overlay-inner'>
-        <h2>Significant pollutant spread in 2014</h2>
-        <label id='month'></label>
-        <input id='slider' type='range' min='0' max='11' step='1' value='0'/>
-    </div>
-    <!--<div class='map-overlay-inner'>-->
-        <!--<div id='legend' class='legend'>-->
-            <!--<div class='bar'></div>-->
-            <!--<div>Magnitude (m)</div>-->
-        <!--</div>-->
-    <!--</div>-->
-</div>
 
 </body>
 </html>
