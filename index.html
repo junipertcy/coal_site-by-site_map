@@ -10,9 +10,11 @@
 
     <script src='node_modules/@mapbox/leaflet-omnivore/leaflet-omnivore.min.js'></script>
 
+    <link href='assets/css/popup.css' rel='stylesheet'/>
     <link href='assets/css/map.css' rel='stylesheet'/>
     <link href='assets/css/icons.css' rel='stylesheet'/>
     <link href='assets/css/layout.css' rel='stylesheet'/>
+
     <link href='node_modules/leaflet/dist/leaflet.css' rel='stylesheet'/>
 
     <script src="assets/js/map_operations.js"></script>
@@ -20,13 +22,14 @@
     <link href='node_modules/mapbox-gl/dist/mapbox-gl.css' rel='stylesheet'/>
     <script src='assets/js/mapbox-gl-language.js'></script>
     <script src='assets/js/coal_plant_listings.js'></script>
-
+    <script src='assets/js/map_style.js'></script>
+<link href='https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,700' rel='stylesheet'>
 </head>
 <body>
 
 <div class='sidebar'>
     <div class='heading'>
-        <h1>Plant locations</h1>
+        <h1>発電所名</h1>
     </div>
     <div id='listings' class='listings'></div>
 </div>
@@ -74,29 +77,6 @@
         // Set the label to the month
         document.getElementById('month').textContent = months[month];
     }
-
-    var style = {
-        "version": 8,
-        "sources": {
-            "simple-tiles": {
-                "type": "raster",
-                "tiles": [
-                    "https://a.tile.openstreetmap.org/{z}/{x}/{y}.png",
-                    "https://b.tile.openstreetmap.org/{z}/{x}/{y}.png",
-                    "https://c.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                ],
-                "tileSize": 256
-            }
-        },
-        "layers": [{
-            "id": "simple-tiles",
-            "type": "raster",
-            "source": "simple-tiles",
-            "minzoom": 0,
-            "maxzoom": 22
-        }]
-    };
-
     mapboxgl.accessToken = 'pk.eyJ1IjoianVuaXBlcnRjeSIsImEiOiJvOFg5WFVjIn0.7NDB1oOLpq3A5qO7vLaQSA';
 
     var map = new mapboxgl.Map({
@@ -162,18 +142,68 @@
             }
         });
 
-        // map.setGeoJSONSourceData()
+        // This will let you use the .remove() function later on
+        if (!('remove' in Element.prototype)) {
+            Element.prototype.remove = function () {
+                if (this.parentNode) {
+                    this.parentNode.removeChild(this);
+                }
+            };
+        }
 
-        // var myLayer = mapboxgl.featureLayer().setGeoJSON(plants).addTo(map);
-        plants.features.forEach(function (marker) {
-            // create a HTML element for each feature
-            var el = document.createElement('div');
-            el.className = 'marker';
+        // Markers
+        map.on('load', function () {
+            map.addSource("markers", {
+                "type": "geojson",
+                "data": plants
+            });
 
-            // make a marker for each feature and add to the map
-            new mapboxgl.Marker(el)
-                .setLngLat(marker.geometry.coordinates)
-                .addTo(map);
+            map.addLayer({
+                "id": "markers",
+                "type": "symbol",
+                "source": "markers",
+                "layout": {
+                    "icon-image": "{marker-symbol}-15",
+                    'icon-allow-overlap': true,
+                    // "text-field": "{name}",
+                    "text-font": ["Open Sans Semibold", "Arial Unicode MS Bold"],
+                    "text-offset": [0, 0.8],
+                    "text-anchor": "top",
+                    "text-size": 12,
+                    "text-allow-overlap": true
+                },
+                "paint": {}
+            });
+        });
+        // map.addControl(new mapboxgl.Navigation());
+
+        // Add an event listener for when a user clicks on the map
+        map.on('click', function (e) {
+            // Query all the rendered points in the view
+            var features = map.queryRenderedFeatures(e.point, {layers: ['markers']});
+            if (features.length) {
+                var clickedPoint = features[0];
+                // 1. Fly to the point
+                flyToStore(clickedPoint);
+                // 2. Close all other popups and display popup for clicked store
+                createPopUp(clickedPoint);
+                // 3. Highlight listing in sidebar (and remove highlight for all other listings)
+                var activeItem = document.getElementsByClassName('active');
+                if (activeItem[0]) {
+                    activeItem[0].classList.remove('active');
+                }
+                // Find the index of the store.features that corresponds to the clickedPoint that fired the event listener
+                var selectedFeature = clickedPoint.properties.address;
+
+                for (var i = 0; i < plants.features.length; i++) {
+                    if (plants.features[i].properties.address === selectedFeature) {
+                        selectedFeatureIndex = i;
+                    }
+                }
+                // Select the correct list item using the found index and add the active class
+                var listing = document.getElementById('listing-' + selectedFeatureIndex);
+                listing.classList.add('active');
+            }
         });
 
 

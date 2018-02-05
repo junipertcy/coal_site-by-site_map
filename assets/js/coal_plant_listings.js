@@ -11,8 +11,7 @@ var plants = {
                 "name": "千葉袖ケ浦火力発電所1号機（仮)",
                 "capacity": "100.0 [万kW]",
                 "status": "アセスメント実施中",
-                "title": "Mapbox SF",
-                "icon": "harbor"
+                "marker-symbol": "harbor"
             }
         }, {
             "type": "Feature",
@@ -24,9 +23,7 @@ var plants = {
                 "name": "千葉袖ケ浦火力発電所2号機（仮)",
                 "capacity": "100.0 [万kW]",
                 "status": "アセスメント実施中",
-                'marker-color': '#3bb2d0',
-                'marker-size': 'large',
-                'marker-symbol': 'rocket'
+                "marker-symbol": "harbor"
             }
         }]
 };
