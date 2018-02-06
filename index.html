@@ -7,8 +7,8 @@
 
     <script src="node_modules/leaflet/dist/leaflet.js"></script>
     <script src="node_modules/lodash/lodash.min.js"></script>
-
     <script src='node_modules/@mapbox/leaflet-omnivore/leaflet-omnivore.min.js'></script>
+    <script src='node_modules/jquery/dist/jquery.min.js'></script>
 
     <link href='assets/css/popup.css' rel='stylesheet'/>
     <link href='assets/css/map.css' rel='stylesheet'/>
@@ -18,12 +18,13 @@
     <link href='node_modules/leaflet/dist/leaflet.css' rel='stylesheet'/>
 
     <script src="assets/js/map_operations.js"></script>
+    <script src="assets/js/rgbaToKml/dist/rgbatokml.min.js"></script>
     <script src='node_modules/mapbox-gl/dist/mapbox-gl.js'></script>
     <link href='node_modules/mapbox-gl/dist/mapbox-gl.css' rel='stylesheet'/>
     <script src='assets/js/mapbox-gl-language.js'></script>
     <script src='assets/js/coal_plant_listings.js'></script>
     <script src='assets/js/map_style.js'></script>
-<link href='https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,700' rel='stylesheet'>
+    <link href='https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,700' rel='stylesheet'>
 </head>
 <body>
 
@@ -42,13 +43,19 @@
     </div>
 </div>
 
-<div class='map-overlay' style="z-index: 1001; margin-left: 300px; width: 400px;">
+<div class='map-overlay' style="z-index: 1001; margin-left: 20%; width: 400px;">
     <div class='map-overlay-inner'>
-
         <h2>Significant pollutant spread in 2014</h2>
         <label id='month'></label>
         <input id='slider' type='range' min='0' max='11' step='1' value='0'/>
     </div>
+    <div class='map-overlay-inner' style="width: 120px;">
+        <div id='legend' class='legend' style="width: 110px;">
+            <!--<div class='bar'></div>-->
+            <div style="color: white; font-weight: bold;">Magnitude (m)</div>
+        </div>
+    </div>
+
 </div>
 
 <script>
@@ -77,6 +84,7 @@
         // Set the label to the month
         document.getElementById('month').textContent = months[month];
     }
+
     mapboxgl.accessToken = 'pk.eyJ1IjoianVuaXBlcnRjeSIsImEiOiJvOFg5WFVjIn0.7NDB1oOLpq3A5qO7vLaQSA';
 
     var map = new mapboxgl.Map({
@@ -119,6 +127,12 @@
             } catch (e) {
                 d.properties.month = 12;  // always present
             }
+            try {
+                d.properties.color = getColor(d.properties.name);
+            } catch (e) {
+                console.log(d);
+            }
+
             return d;
         });
 
@@ -134,88 +148,154 @@
         map.addLayer({
             'id': 'pollution-polygons',
             'type': 'fill',
+            "interactive": true,
             'source': 'pollutions',
             'paint': {
-                'fill-color': "red",
-                'fill-opacity': 0.1
+                'fill-color': { "type": "identity", "property": "color" },
+                'fill-opacity': 0.5,
+                'fill-outline-color': "white"
 
             }
         });
 
-        // This will let you use the .remove() function later on
-        if (!('remove' in Element.prototype)) {
-            Element.prototype.remove = function () {
-                if (this.parentNode) {
-                    this.parentNode.removeChild(this);
-                }
-            };
-        }
+        // // This will let you use the .remove() function later on
+        // if (!('remove' in Element.prototype)) {
+        //     Element.prototype.remove = function () {
+        //         if (this.parentNode) {
+        //             this.parentNode.removeChild(this);
+        //         }
+        //     };
+        // }
 
         // Markers
         map.on('load', function () {
-            map.addSource("markers", {
-                "type": "geojson",
-                "data": plants
-            });
+            // map.addSource("markers", {
+            //     "type": "geojson",
+            //     "data": plants
+            // });
 
-            map.addLayer({
-                "id": "markers",
-                "type": "symbol",
-                "source": "markers",
-                "layout": {
-                    "icon-image": "{marker-symbol}-15",
-                    'icon-allow-overlap': true,
-                    // "text-field": "{name}",
-                    "text-font": ["Open Sans Semibold", "Arial Unicode MS Bold"],
-                    "text-offset": [0, 0.8],
-                    "text-anchor": "top",
-                    "text-size": 12,
-                    "text-allow-overlap": true
-                },
-                "paint": {}
-            });
-        });
-        // map.addControl(new mapboxgl.Navigation());
-
-        // Add an event listener for when a user clicks on the map
-        map.on('click', function (e) {
-            // Query all the rendered points in the view
-            var features = map.queryRenderedFeatures(e.point, {layers: ['markers']});
-            if (features.length) {
-                var clickedPoint = features[0];
-                // 1. Fly to the point
-                flyToStore(clickedPoint);
-                // 2. Close all other popups and display popup for clicked store
-                createPopUp(clickedPoint);
-                // 3. Highlight listing in sidebar (and remove highlight for all other listings)
-                var activeItem = document.getElementsByClassName('active');
-                if (activeItem[0]) {
-                    activeItem[0].classList.remove('active');
-                }
-                // Find the index of the store.features that corresponds to the clickedPoint that fired the event listener
-                var selectedFeature = clickedPoint.properties.address;
-
-                for (var i = 0; i < plants.features.length; i++) {
-                    if (plants.features[i].properties.address === selectedFeature) {
-                        selectedFeatureIndex = i;
+            map.loadImage('assets/css/img/factoryTransp3.png', function (error, image) {
+                if (error) throw error;
+                map.addImage('industry', image);
+                map.addLayer({
+                    "id": "points",
+                    "type": "symbol",
+                    "interactive": true,
+                    "source": {
+                        "type": "geojson",
+                        "data": plants
+                    },
+                    "layout": {
+                        "icon-image": "industry",
+                        "icon-size": 0.25,
+                        'icon-allow-overlap': true
                     }
-                }
-                // Select the correct list item using the found index and add the active class
-                var listing = document.getElementById('listing-' + selectedFeatureIndex);
-                listing.classList.add('active');
-            }
+                });
+
+
+            });
+            buildLocationList(plants);
+
         });
 
 
-        buildLocationList(plants);
         filterBy(0);  // January
 
         document.getElementById('slider').addEventListener('input', function (e) {
-
             var month = parseInt(e.target.value);
             filterBy(month);
         });
+
+        var colors = [];
+        for (i = 0; i < pre_data.length; i++) {
+            var layer = pre_data[i].properties.name;
+            if (colors.length === 3) {
+                continue;
+            }
+            if (layer === "0.05 - 0.1") {
+                if (_.indexOf(colors, "#5990e2") === -1) {
+                    var color = "#5990e2"
+                } else {
+                    continue;
+                }
+            } else if (layer === "0.1 - 0.2") {
+                if (_.indexOf(colors, "#FCA107") === -1) {
+                    var color = "#FCA107"
+                } else {
+                    continue;
+                }
+            } else if (layer === "0.2 - 0.3") {
+                if (_.indexOf(colors, "#7f3121") === -1) {
+                    var color = "#7f3121"
+                } else {
+                    continue;
+                }
+            }
+            // var color = kml2hex(pre_data[i].properties.styleHash);
+            var item = document.createElement('div');
+            var key = document.createElement('div');
+            key.className = 'bar';
+            key.style.background = color;
+            var value = document.createElement('span');
+            value.innerHTML = layer;
+            item.appendChild(key);
+            item.appendChild(value);
+            legend.appendChild(item);
+            colors.push(color);
+        }
+
+
+
+
+
+
     });
+
+
+
+
+
+    // map.on("render", function () {
+    //     if (map.loaded() && map.getStyle().layers.length === 3) {
+    //         console.log("render!");
+    //         map.on('click', 'points', function (e) {
+    //             var features = map.queryRenderedFeatures(e.point, {layers: ['points']});
+    //             if (features.length) {
+    //                 console.log(features.length);
+    //                 var clickedPoint = features[0];
+    //                 flyToStore(clickedPoint);
+    //                 createPopUp(clickedPoint);
+    //                 var activeItem = document.getElementsByClassName('active');
+    //                 if (activeItem[0]) {
+    //                     activeItem[0].classList.remove('active');
+    //                 }
+    //                 var selectedFeature = clickedPoint.properties.address;
+    //
+    //                 for (var i = 0; i < plants.features.length; i++) {
+    //                     if (plants.features[i].properties.address === selectedFeature) {
+    //                         selectedFeatureIndex = i;
+    //                     }
+    //                 }
+    //                 var listing = document.getElementById('listing-' + selectedFeatureIndex);
+    //                 listing.classList.add('active');
+    //             }
+    //         });
+    //
+    //         map.on('mouseenter', 'points', function () {
+    //             map.getCanvas().style.cursor = 'pointer';
+    //         });
+    //
+    //         map.on('mouseleave', 'points', function () {
+    //             map.getCanvas().style.cursor = '';
+    //         });
+    //
+    //         map.off("render", );
+    //     }
+    // })
+    // $(window).bind("load", function() {
+    //     // code here
+    //     console.log(map.getStyle().layers);
+    // });
 
 </script>
 

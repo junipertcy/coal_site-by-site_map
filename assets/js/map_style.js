@@ -1,7 +1,7 @@
 var style = {
     "version": 8,
     "sources": {
-        "simple-tiles": {
+        "open-street-map": {
             "type": "raster",
             "tiles": [
                 "https://a.tile.openstreetmap.org/{z}/{x}/{y}.png",
@@ -12,11 +12,11 @@ var style = {
         }
     },
     "layers": [{
-        "id": "simple-tiles",
+        "id": "open-street-map",
         "type": "raster",
-        "source": "simple-tiles",
+        "source": "open-street-map",
         "minzoom": 0,
-        "maxzoom": 22
+        "maxzoom": 18
     }],
     "sprite": "mapbox://sprites/mapbox/streets-v8",
     "glyphs": "mapbox://fonts/mapbox/{fontstack}/{range}.pbf"
