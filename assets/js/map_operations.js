@@ -1,7 +1,7 @@
 function flyToStore(currentFeature) {
     map.flyTo({
         center: currentFeature.geometry.coordinates,
-        zoom: 10
+        zoom: 8
     });
 }
 
@@ -13,28 +13,27 @@ function createPopUp(currentFeature) {
     var popup = new mapboxgl.Popup({closeOnClick: true, closeButton: true})
         .setLngLat(currentFeature.geometry.coordinates)
         .setHTML(
-            '<h3>' + currentFeature.properties.name + '</h3>' +
-            '<h4>' + currentFeature.properties.status + '</h4>'
+            '<h4>' + currentFeature.properties.name + '</h4>' +
+            '<div>' +
+                '状況: ' + currentFeature.properties.status + '<br>' +
+                '設備容量（最大発電能力）: ' + currentFeature.properties.capacity + '<br>' +
+                '企業名／運営会社: ' + currentFeature.properties.operator + '<br>' +
+                '親会社／出資者等: ' + currentFeature.properties.investors + '<br>' +
+                '燃料: ' + currentFeature.properties.fuels_used + '<br>' +
+            '</div>'
         )
         .addTo(map);
 
     var close_button = document.getElementsByClassName('mapboxgl-popup-close-button');
-    close_button[0].style["display"] = "block";
-    close_button[0].style["margin-top"] = "-10px";
-    close_button[0].style["color"] = "white";
+    close_button[0].style['display'] = 'block';
+    close_button[0].style['margin-top'] = '-10px';
+    close_button[0].style['color'] = 'white';
 
     popup.on('close', function (e) {
         var activeItem = document.getElementsByClassName('active');
         if (activeItem[0]) {
             activeItem[0].classList.remove('active');
         }
-        map.on('mouseenter', 'points', function () {
-            map.getCanvas().style.cursor = 'pointer';
-        });
-
-        map.on('mouseleave', 'points', function () {
-            map.getCanvas().style.cursor = '';
-        });
 
     });
 }
@@ -90,7 +89,7 @@ function buildLocationList(data) {
 
 
 function kml2hex(kml_str) {
-    if (kml_str[0] === "-") {
+    if (kml_str[0] === '-') {
         kml_str = kml_str.substr(1)
     }
     // var alpha = parseInt(kml_str.slice(0, 2), 16);
@@ -98,18 +97,19 @@ function kml2hex(kml_str) {
     // var green = parseInt(kml_str.slice(4, 6).toUpperCase(), 16);
     // var red = parseInt(kml_str.slice(6, 8).toUpperCase(), 16);
     // return [red, green, blue, alpha];
-    rgba = converter.kmlToRgba(kml_str);
-    return "rgba(" + rgba.r + "," + rgba.g + "," + rgba.b + "," + rgba.a + ")";
+    // rgba = converter.kmlToRgba(kml_str);
+    // return 'rgba(' + rgba.r + ',' + rgba.g + ',' + rgba.b + ',' + rgba.a + ')';
+    return;  // TODO or DELETE
 }
 
 function getColor(level) {
     var color;
-    if (level === "0.05 - 0.1") {
-        color = "#5990e2"
-    } else if (level === "0.1 - 0.2") {
-        color = "#FCA107"
-    } else if (level === "0.2 - 0.3") {
-        color = "#7f3121"
+    if (level === '0.05 - 0.1') {
+        color = '#5990e2'
+    } else if (level === '0.1 - 0.2') {
+        color = '#FCA107'
+    } else if (level === '0.2 - 0.3') {
+        color = '#7f3121'
     }
     return color;
 }

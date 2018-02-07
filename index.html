@@ -18,7 +18,6 @@
     <link href='node_modules/leaflet/dist/leaflet.css' rel='stylesheet'/>
 
     <script src="assets/js/map_operations.js"></script>
-    <script src="assets/js/rgbaToKml/dist/rgbatokml.min.js"></script>
     <script src='node_modules/mapbox-gl/dist/mapbox-gl.js'></script>
     <link href='node_modules/mapbox-gl/dist/mapbox-gl.css' rel='stylesheet'/>
     <script src='assets/js/mapbox-gl-language.js'></script>
@@ -55,7 +54,6 @@
             <div style="color: white; font-weight: bold;">Magnitude (m)</div>
         </div>
     </div>
-
 </div>
 
 <script>
@@ -79,9 +77,6 @@
 
         var filters = ['==', 'month', month];
         map.setFilter('pollution-polygons', filters);
-        // map.setFilter('earthquake-labels', filters);
-
-        // Set the label to the month
         document.getElementById('month').textContent = months[month];
     }
 
@@ -89,12 +84,47 @@
 
     var map = new mapboxgl.Map({
         container: 'map',
-        zoomControl: true,
         style: style,
         center: [139.982, 35.4744],
         zoom: 6
     });
 
+    map.on('sourcedata', function (sourcedata) {
+        if (sourcedata.sourceId === "points" && sourcedata.isSourceLoaded) {
+            console.log(sourcedata);
+            map.on('mouseenter', 'points', function () {
+                console.log("mouseenter events detected!");
+                map.getCanvas().style.cursor = 'pointer';
+            });
+            console.log("mouseenter events defined!");
+            map.on('mouseleave', 'points', function () {
+                map.getCanvas().style.cursor = '';
+            });
+
+            map.on('click', function (e) {
+                var features = map.queryRenderedFeatures(e.point, {layers: ['points']});
+                if (features.length) {
+                    var clickedPoint = features[0];
+                    flyToStore(clickedPoint);
+                    createPopUp(clickedPoint);
+                    var activeItem = document.getElementsByClassName('active');
+                    if (activeItem[0]) {
+                        activeItem[0].classList.remove('active');
+                    }
+                    var selectedFeature = clickedPoint.properties.id;
+
+                    for (var i = 0; i < plants.features.length; i++) {
+                        if (plants.features[i].properties.id === selectedFeature) {
+                            selectedFeatureIndex = i;
+                        }
+                    }
+                    var listing = document.getElementById('listing-' + selectedFeatureIndex);
+                    listing.classList.add('active');
+                }
+            });
+        }
+
+    });
 
     omnivore.kml('dataset/demo/japan30_no2_concentration_monthly.kml').on('ready', function (d) {
         ls = d.target.getLayers();
@@ -151,29 +181,16 @@
             "interactive": true,
             'source': 'pollutions',
             'paint': {
-                'fill-color': { "type": "identity", "property": "color" },
+                'fill-color': {"type": "identity", "property": "color"},
                 'fill-opacity': 0.5,
                 'fill-outline-color': "white"
 
             }
         });
 
-        // // This will let you use the .remove() function later on
-        // if (!('remove' in Element.prototype)) {
-        //     Element.prototype.remove = function () {
-        //         if (this.parentNode) {
-        //             this.parentNode.removeChild(this);
-        //         }
-        //     };
-        // }
 
         // Markers
         map.on('load', function () {
-            // map.addSource("markers", {
-            //     "type": "geojson",
-            //     "data": plants
-            // });
-
             map.loadImage('assets/css/img/factoryTransp3.png', function (error, image) {
                 if (error) throw error;
                 map.addImage('industry', image);
@@ -191,11 +208,8 @@
                         'icon-allow-overlap': true
                     }
                 });
-
-
             });
             buildLocationList(plants);
-
         });
 
 
@@ -243,60 +257,7 @@
             legend.appendChild(item);
             colors.push(color);
         }
-
-
-
-
-
-
     });
-
-
-
-
-
-    // map.on("render", function () {
-    //     if (map.loaded() && map.getStyle().layers.length === 3) {
-    //         console.log("render!");
-    //         map.on('click', 'points', function (e) {
-    //             var features = map.queryRenderedFeatures(e.point, {layers: ['points']});
-    //             if (features.length) {
-    //                 console.log(features.length);
-    //                 var clickedPoint = features[0];
-    //                 flyToStore(clickedPoint);
-    //                 createPopUp(clickedPoint);
-    //                 var activeItem = document.getElementsByClassName('active');
-    //                 if (activeItem[0]) {
-    //                     activeItem[0].classList.remove('active');
-    //                 }
-    //                 var selectedFeature = clickedPoint.properties.address;
-    //
-    //                 for (var i = 0; i < plants.features.length; i++) {
-    //                     if (plants.features[i].properties.address === selectedFeature) {
-    //                         selectedFeatureIndex = i;
-    //                     }
-    //                 }
-    //                 var listing = document.getElementById('listing-' + selectedFeatureIndex);
-    //                 listing.classList.add('active');
-    //             }
-    //         });
-    //
-    //         map.on('mouseenter', 'points', function () {
-    //             map.getCanvas().style.cursor = 'pointer';
-    //         });
-    //
-    //         map.on('mouseleave', 'points', function () {
-    //             map.getCanvas().style.cursor = '';
-    //         });
-    //
-    //         map.off("render", );
-    //     }
-    // })
-    // $(window).bind("load", function() {
-    //     // code here
-    //     console.log(map.getStyle().layers);
-    // });
-
 </script>
 
 
