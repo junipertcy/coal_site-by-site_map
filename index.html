@@ -190,28 +190,25 @@
         });
 
 
-        // Markers
-        map.on('load', function () {
-            map.loadImage('assets/css/img/factoryTransp3.png', function (error, image) {
-                if (error) throw error;
-                map.addImage('industry', image);
-                map.addLayer({
-                    "id": "points",
-                    "type": "symbol",
-                    "interactive": true,
-                    "source": {
-                        "type": "geojson",
-                        "data": plants
-                    },
-                    "layout": {
-                        "icon-image": "industry",
-                        "icon-size": 0.25,
-                        'icon-allow-overlap': true
-                    }
-                });
+        map.loadImage('assets/css/img/factoryTransp3.png', function (error, image) {
+            if (error) throw error;
+            map.addImage('industry', image);
+            map.addLayer({
+                "id": "points",
+                "type": "symbol",
+                "interactive": true,
+                "source": {
+                    "type": "geojson",
+                    "data": plants
+                },
+                "layout": {
+                    "icon-image": "industry",
+                    "icon-size": 0.25,
+                    'icon-allow-overlap': true
+                }
             });
-            buildLocationList(plants);
         });
+        buildLocationList(plants);
 
 
         filterBy(0);  // January
