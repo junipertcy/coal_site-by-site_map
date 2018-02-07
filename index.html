@@ -44,14 +44,14 @@
 
 <div class='map-overlay' style="z-index: 1001; margin-left: 20%; width: 400px;">
     <div class='map-overlay-inner'>
-        <h2>Significant pollutant spread in 2014</h2>
+        <h2>NO2 排出量（t/年）</h2>
         <label id='month'></label>
         <input id='slider' type='range' min='0' max='11' step='1' value='0'/>
     </div>
     <div class='map-overlay-inner' style="width: 120px;">
         <div id='legend' class='legend' style="width: 110px;">
             <!--<div class='bar'></div>-->
-            <div style="color: white; font-weight: bold;">Magnitude (m)</div>
+            <div style="color: white; font-weight: bold;">濃度 (ppm)</div>
         </div>
     </div>
 </div>
@@ -59,18 +59,18 @@
 <script>
 
     var months = [
-        'January',
-        'February',
-        'March',
-        'April',
-        'May',
-        'June',
-        'July',
-        'August',
-        'September',
-        'October',
-        'November',
-        'December'
+        '1 月',
+        '2 月',
+        '3 月',
+        '4 月',
+        '5 月',
+        '6 月',
+        '7 月',
+        '8 月',
+        '9 月',
+        '10 月',
+        '11 月',
+        '12 月'
     ];
 
     function filterBy(month) {
@@ -88,6 +88,7 @@
         center: [139.982, 35.4744],
         zoom: 6
     });
+    map.addControl(new mapboxgl.NavigationControl());
 
     map.on('sourcedata', function (sourcedata) {
         if (sourcedata.sourceId === "points" && sourcedata.isSourceLoaded) {

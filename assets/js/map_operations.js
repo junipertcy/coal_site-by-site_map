@@ -13,21 +13,53 @@ function createPopUp(currentFeature) {
     var popup = new mapboxgl.Popup({closeOnClick: true, closeButton: true})
         .setLngLat(currentFeature.geometry.coordinates)
         .setHTML(
-            '<h4>' + currentFeature.properties.name + '</h4>' +
-            '<div>' +
-                '状況: ' + currentFeature.properties.status + '<br>' +
-                '設備容量（最大発電能力）: ' + currentFeature.properties.capacity + '<br>' +
-                '企業名／運営会社: ' + currentFeature.properties.operator + '<br>' +
-                '親会社／出資者等: ' + currentFeature.properties.investors + '<br>' +
-                '燃料: ' + currentFeature.properties.fuels_used + '<br>' +
-            '</div>'
+            // '<h4>' + currentFeature.properties.name + '</h4>' +
+            // '<div>' +
+            //     '状況: ' + currentFeature.properties.status + '<br>' +
+            //     '設備容量（最大発電能力）: ' + currentFeature.properties.capacity + '<br>' +
+            //     '企業名／運営会社: ' + currentFeature.properties.operator + '<br>' +
+            //     '親会社／出資者等: ' + currentFeature.properties.investors + '<br>' +
+            //     '燃料: ' + currentFeature.properties.fuels_used + '<br>' +
+            // '</div>'
+
+            '<table>' +
+            '  <thead>' +
+            '    <tr>' +
+            '      <th colspan="2">' + currentFeature.properties.name + '</th>' +
+            '    </tr>' +
+            '  </thead>' +
+            '  <tbody>' +
+            '    <tr>' +
+            '      <td>状況</td>' +
+            '      <td>' + currentFeature.properties.status + '</td>' +
+            '    </tr>' +
+            '    <tr>' +
+            '      <td>設備容量（最大発電能力）</td>' +
+            '      <td>' + currentFeature.properties.capacity + '</td>' +
+            '    </tr>' +
+            '    <tr>' +
+            '      <td>企業名／運営会社</td>' +
+            '      <td>' + currentFeature.properties.operator + '</td>' +
+            '    </tr>' +
+            '    <tr>' +
+            '      <td>親会社／出資者等</td>' +
+            '      <td>' + currentFeature.properties.investors + '</td>' +
+            '    </tr>' +
+            '    <tr>' +
+            '      <td>燃料</td>' +
+            '      <td>' + currentFeature.properties.fuels_used + '</td>' +
+            '    </tr>' +
+            '  </tbody>' +
+            '</table>'
+
+
         )
         .addTo(map);
 
     var close_button = document.getElementsByClassName('mapboxgl-popup-close-button');
     close_button[0].style['display'] = 'block';
-    close_button[0].style['margin-top'] = '-10px';
-    close_button[0].style['color'] = 'white';
+    close_button[0].style['margin-top'] = '0px';
+    close_button[0].style['color'] = 'black';
 
     popup.on('close', function (e) {
         var activeItem = document.getElementsByClassName('active');

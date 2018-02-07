@@ -1,6 +1,7 @@
 /* Marker tweaks */
 .mapboxgl-popup-close-button {
     display: none;
+    margin-top: 0px;
 }
 
 .mapboxgl-popup-content-wrapper {
@@ -8,31 +9,27 @@
 }
 
 .mapboxgl-popup-content {
+    width: 100%;
+    border-collapse: collapse;
     font: 400 15px/22px 'Source Sans Pro', 'Helvetica Neue', Sans-serif;
     padding: 0;
-    width: 180px;
 }
 
-.mapboxgl-popup-content h4 {
-    background: #91c949;
-    color: #fff;
-    margin: 0;
-    display: block;
-    padding: 10px;
-    border-radius: 3px 3px 0 0;
-    font-weight: 700;
-    margin-top: -10px;
+.mapboxgl-popup-content td, .mapboxgl-popup-content th {
+    border: 1px solid #ddd;
+    padding: 8px;
 }
 
-.mapboxgl-popup-content h5 {
-    margin: 0;
-    display: block;
-    padding: 10px;
-    font-weight: 400;
-}
+.mapboxgl-popup-content tr:nth-child(even){background-color: #f2f2f2;}
 
-.mapboxgl-popup-content div {
-    padding: 0px;
+.mapboxgl-popup-content tr:hover {background-color: #ddd;}
+
+.mapboxgl-popup-content th {
+    padding-top: 12px;
+    padding-bottom: 12px;
+    text-align: left;
+    background-color: #39CCCC;
+    color: whitesmoke;
 }
 
 .mapboxgl-container .leaflet-marker-icon {
