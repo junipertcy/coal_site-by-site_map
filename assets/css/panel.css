@@ -1,0 +1,67 @@
+body {
+    /*margin: 0;*/
+    /*padding: 0;*/
+}
+
+#map {
+    position: relative;
+    top: 0;
+    bottom: 0;
+    z-index: 0;
+    height: 100%;
+}
+
+#panel .toggle-button {
+    position: absolute;
+    top: 1%;
+    left: 0.5%;
+    z-index: 1000;
+}
+
+
+.mapbox-attribution-container {
+    z-index: 1000;
+    bottom: 0;
+    right: 0.5%;
+    position: absolute;
+    display: block;
+}
+
+.mapboxgl-ctrl-compass {
+    display: none !important;
+}
+
+.legend {
+    z-index: 1000;
+    bottom: 0;
+    top: 0.5%;
+    right: 4%;
+    /*margin: calc(2rem - .14285714em) 0 1rem;*/
+    position: absolute;
+    display: block;
+    background: dimgrey;
+    height: 80px;
+    padding: 5px 5px 5px 5px;
+    border-radius: 5px;
+    border: 1px solid #3498db;
+}
+
+.legend .bar {
+    height: 15px;
+    width: 100px;
+    background: linear-gradient(to right, #FCA107, #7F3121);
+}
+
+.map-overlay input {
+    background-color: transparent;
+    display: inline-block;
+    width: 100%;
+    position: relative;
+    margin: 0;
+    cursor: ew-resize;
+}
+
+.map-overlay-inner span {
+    color: white;
+    font-weight: bold;
+}

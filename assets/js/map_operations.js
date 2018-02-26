@@ -1,7 +1,7 @@
 function flyToStore(currentFeature) {
     map.flyTo({
-        center: currentFeature.geometry.coordinates,
-        zoom: 8
+        // center: currentFeature.geometry.coordinates,
+        // zoom: 8
     });
 }
 
@@ -51,20 +51,25 @@ function createPopUp(currentFeature) {
             '    </tr>' +
             '  </tbody>' +
             '</table>'
-
-
         )
         .addTo(map);
 
     var close_button = document.getElementsByClassName('mapboxgl-popup-close-button');
+    // close_button[0].className = "className"
     close_button[0].style['display'] = 'block';
     close_button[0].style['margin-top'] = '0px';
     close_button[0].style['color'] = 'black';
+
+    close_button[0].style['background-image'] = "url(data:image/svg+xml;base64,PHN2ZyB4bWxuczpzdmc9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyMCAyMCIgdmVyc2lvbj0iMS4xIiBoZWlnaHQ9IjIwIiB3aWR0aD0iMjAiPg0KICA8cGF0aCBkPSJtNSA1IDAgMS41IDMuNSAzLjUtMy41IDMuNSAwIDEuNSAxLjUgMCAzLjUtMy41IDMuNSAzLjUgMS41IDAgMC0xLjUtMy41LTMuNSAzLjUtMy41IDAtMS41LTEuNSAwLTMuNSAzLjUtMy41LTMuNS0xLjUgMHoiIGZpbGw9IiMwMDAiLz4NCjwvc3ZnPg==)";
 
     popup.on('close', function (e) {
         var activeItem = document.getElementsByClassName('active');
         if (activeItem[0]) {
             activeItem[0].classList.remove('active');
+            map.flyTo({
+                // center: [142.61871875040669, 38.13053360748921],
+                // zoom: 5
+            })
         }
 
     });

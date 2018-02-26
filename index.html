@@ -1,20 +1,18 @@
 <!DOCTYPE html>
-<html>
+<html lang="en" class="gr__slideout_js_org">
 <head>
     <meta charset='utf-8'/>
     <title>Japan coal site-by-site map</title>
     <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no'/>
-
+    <script src='node_modules/jquery/dist/jquery.min.js'></script>
     <script src="node_modules/leaflet/dist/leaflet.js"></script>
     <script src="node_modules/lodash/lodash.min.js"></script>
     <script src='node_modules/@mapbox/leaflet-omnivore/leaflet-omnivore.min.js'></script>
-    <script src='node_modules/jquery/dist/jquery.min.js'></script>
 
     <link href='assets/css/popup.css' rel='stylesheet'/>
-    <link href='assets/css/map.css' rel='stylesheet'/>
+    <link href='assets/css/panel.css' rel='stylesheet'/>
     <link href='assets/css/icons.css' rel='stylesheet'/>
-    <link href='assets/css/layout.css' rel='stylesheet'/>
-
+    <link href='assets/css/menu.css' rel='stylesheet'/>
     <link href='node_modules/leaflet/dist/leaflet.css' rel='stylesheet'/>
 
     <script src="assets/js/map_operations.js"></script>
@@ -23,38 +21,95 @@
     <script src='assets/js/mapbox-gl-language.js'></script>
     <script src='assets/js/coal_plant_listings.js'></script>
     <script src='assets/js/map_style.js'></script>
+
+    <script src='assets/js/semantic.min.js'></script>
+
+    <link href='assets/css/test/styles.css' rel='stylesheet'>
     <link href='https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,700' rel='stylesheet'>
+
+    <link href='assets/js/semantic.min.css' rel='stylesheet'>
+    <link href='assets/css/slider.css' rel='stylesheet'>
+    <link href='assets/css/cartodb.css' rel='stylesheet'>
 </head>
 <body>
 
-<div class='sidebar'>
-    <div class='heading'>
-        <h1>発電所名</h1>
+<nav id="menu">
+    <div class="header">
+        <hr>
+        <h3 class="apptitle">Coal site-by-site map</h3>
+        <div id="helpbar">
+            <button class="ui mini right labeled icon violet button" style="width: 120px;"><i class="icon info"></i>
+                これは何ですか？
+            </button>
+            &nbsp;
+            <button class="ui mini right labeled icon violet button" style="width: 120px;"><i class="icon right arrow"></i>
+                もっと詳しく知る
+            </button>
+            <hr>
+        </div>
+        <div id="picker">
+            <h5>CHOOSE A POLLUTANT:</h5>
+            <button class="mini ui inverted blue icon button active"><i class="icon asterisk"></i>
+                NO2
+            </button>
+            <button class="mini ui inverted red icon button"><i class="icon asterisk"></i>
+                SO2
+            </button>
+            <button class="mini ui inverted red icon button"><i class="icon asterisk"></i>
+                PM2.5
+            </button>
+
+        </div>
     </div>
     <div id='listings' class='listings'></div>
-</div>
+    <div class='logo'></div>
+</nav>
 
-<div id='map' class="map pad2">
+<main id="panel">
+    <button class="toggle-button">☰</button>
     <div class="mapbox-attribution-container">
         <a href="https://www.mapbox.com/about/maps/">© Mapbox | </a>
         <a href="https://www.openstreetmap.org/copyright">© OpenStreetMap | </a>
         <a href="" target="_blank"><strong>Improve this map</strong></a>
     </div>
-</div>
+    <div id='legend' class='legend'>
+        <div style="font-weight: bold; color: white;">濃度 (ppm)</div>
+    </div>
 
-<div class='map-overlay' style="z-index: 1001; margin-left: 20%; width: 400px;">
-    <div class='map-overlay-inner'>
-        <h2>NO2 排出量（t/年）</h2>
-        <label id='month'></label>
-        <input id='slider' type='range' min='0' max='11' step='1' value='0'/>
+    <!--<br> <h5 style="margin-top: 10px;">NO2 排出量（t / 年）：</h5>-->
+            <!--<div style="position: absolute; width: 40px;">-->
+                <!--<label id='month' style="color: white;"></label>-->
+            <!--</div>-->
+            <!--<input id='slider' style="margin-left: 40px;" type='range' min='0' max='11' step='1' value='0'/>-->
+
+
+
+    <div class="cartodb-timeslider" style="width: 200px; bottom: 20px; left: 20px;">
+        <ul>
+            <li class="controls"><a href="#/play" class="button">play</a></li>
+            <li class="time"><p id="month" class="value">08:29</p></li>
+            <li class="last">
+                <input id='slider' style="margin-left: 40px;" type='range' min='0' max='11' step='1' value='0'/>
+            </li>
+        </ul>
     </div>
-    <div class='map-overlay-inner' style="width: 120px;">
-        <div id='legend' class='legend' style="width: 110px;">
-            <!--<div class='bar'></div>-->
-            <div style="color: white; font-weight: bold;">濃度 (ppm)</div>
-        </div>
-    </div>
-</div>
+</main>
+<script src="node_modules/slideout/dist/slideout.js"></script>
+
+<script>
+    var slideout = new Slideout({
+        'panel': document.getElementById('panel'),
+        'menu': document.getElementById('menu'),
+        'padding': 300,
+        'tolerance': 70
+    });
+
+    // Toggle button
+    document.querySelector('.toggle-button').addEventListener('click', function () {
+        slideout.toggle();
+    });
+</script>
+
 
 <script>
 
@@ -74,7 +129,6 @@
     ];
 
     function filterBy(month) {
-
         var filters = ['==', 'month', month];
         map.setFilter('pollution-polygons', filters);
         document.getElementById('month').textContent = months[month];
@@ -83,16 +137,42 @@
     mapboxgl.accessToken = 'pk.eyJ1IjoianVuaXBlcnRjeSIsImEiOiJvOFg5WFVjIn0.7NDB1oOLpq3A5qO7vLaQSA';
 
     var map = new mapboxgl.Map({
-        container: 'map',
+        container: 'panel',
         style: style,
-        center: [139.982, 35.4744],
-        zoom: 6
+        center: [135.43366015639952, 38.37210580471424],
+        zoom: 5,
+        doubleClickZoom: false,
+        dragRotate: false
     });
-    map.addControl(new mapboxgl.NavigationControl());
 
+    map.addControl(new mapboxgl.NavigationControl(), 'top-right');
+    map.addControl(new mapboxgl.ScaleControl({
+        maxWidth: 160,
+        unit: 'metric'
+    }));
+
+
+    map.on('click', function (e) {
+        console.log(e);
+    });
+
+    //
+    // Holds visible plant features for filtering
+    var _plants = [];
+    // Create a popup, but don't add it to the map yet.
+    var _little_popup = new mapboxgl.Popup({
+        closeButton: false
+    });
+
+    var filterEl = document.getElementById('feature-filter');
+    var listingEl = document.getElementById('feature-listing');
+
+    // Map interactions
     map.on('sourcedata', function (sourcedata) {
-        if (sourcedata.sourceId === "points" && sourcedata.isSourceLoaded) {
-            console.log(sourcedata);
+        if (sourcedata.isSourceLoaded) {
+            map.setMinZoom(5);
+            map.setMaxZoom(16);
+// console.log(sourcedata);
             map.on('mouseenter', 'points', function () {
                 console.log("mouseenter events detected!");
                 map.getCanvas().style.cursor = 'pointer';
@@ -124,7 +204,6 @@
                 }
             });
         }
-
     });
 
     omnivore.kml('dataset/demo/japan30_no2_concentration_monthly.kml').on('ready', function (d) {
@@ -203,7 +282,8 @@
                 },
                 "layout": {
                     "icon-image": "industry",
-                    "icon-size": 0.25,
+                    "icon-size": 0.08,
+                    'icon-ignore-placement': true,
                     'icon-allow-overlap': true
                 }
             });
@@ -221,34 +301,45 @@
         var colors = [];
         for (i = 0; i < pre_data.length; i++) {
             var layer = pre_data[i].properties.name;
+            var color;
+
+            var item = document.createElement('div');
+            var key = document.createElement('div');
+            var value = document.createElement('span');
+
             if (colors.length === 3) {
                 continue;
             }
             if (layer === "0.05 - 0.1") {
                 if (_.indexOf(colors, "#5990e2") === -1) {
-                    var color = "#5990e2"
+                    color = "#5990e2";
+                    value.style.bottom = '35px';
                 } else {
                     continue;
                 }
             } else if (layer === "0.1 - 0.2") {
                 if (_.indexOf(colors, "#FCA107") === -1) {
-                    var color = "#FCA107"
+                    color = "#FCA107";
+                    value.style.bottom = '20px';
                 } else {
                     continue;
                 }
             } else if (layer === "0.2 - 0.3") {
                 if (_.indexOf(colors, "#7f3121") === -1) {
-                    var color = "#7f3121"
+                    color = "#7f3121";
+                    value.style.bottom = '5px';
                 } else {
                     continue;
                 }
             }
-            // var color = kml2hex(pre_data[i].properties.styleHash);
-            var item = document.createElement('div');
-            var key = document.createElement('div');
+
             key.className = 'bar';
             key.style.background = color;
-            var value = document.createElement('span');
+
+            value.style.position = "absolute";
+            value.style.marginLeft = "10px";
+            value.style.color = 'white';
+
             value.innerHTML = layer;
             item.appendChild(key);
             item.appendChild(value);
@@ -257,7 +348,6 @@
         }
     });
 </script>
-
-
+<!--<script src="assets/js/sidebar_handler.js"></script>-->
 </body>
 </html>

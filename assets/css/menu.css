@@ -1,0 +1,170 @@
+body {
+    color: #404040;
+    font: 400 15px/22px 'Source Sans Pro', 'Helvetica Neue', Sans-serif;
+    margin: 0;
+    padding: 0;
+    -webkit-font-smoothing: antialiased;
+}
+
+* {
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+}
+
+a {
+    color: #404040;
+    text-decoration: none;
+}
+
+a:hover {
+    color: #101010;
+}
+
+.sidebar {
+    position: relative;
+    display: table;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    height: 100%;
+    padding: 0px 10px 0px 10px;
+    z-index: 10;
+    background: #444;
+    float: left;
+}
+
+.apptitle {
+    margin-top: -5px;
+    margin-bottom: 3px;
+    color: #fff;
+    text-align: center;
+}
+
+#helpbar {
+    text-align: center;
+    margin-bottom: 10px;
+    margin-top: -12px;
+}
+
+.moreinfo {
+    margin-bottom: 15px;
+    font-style: italic;
+    font-size: 13px;
+    color: #fff;
+}
+
+.header .apptitle h3 {
+    font-size: 22px;
+    margin: 0;
+    font-weight: 400;
+    line-height: 20px;
+    padding: 20px 2px;
+    color: white;
+}
+
+.header h3 {
+    color: whitesmoke;
+}
+
+.header h5 {
+    color: whitesmoke;
+    margin-top: -5px;
+    margin-bottom: -12px;
+}
+
+.listings {
+    height: 60%;
+    overflow: auto;
+    padding-bottom: 60px;
+    background: dimgray;
+    position: absolute;
+    top: 180px;
+    width: 280px;
+}
+
+.listings .item {
+    display: block;
+    border-bottom: 1px solid #eee;
+    padding: 10px;
+    text-decoration: none;
+    color: whitesmoke;
+}
+
+p.hint {
+    color: #777;
+    text-align: right;
+    margin-right: 24px;
+    margin-top: -20px;
+}
+
+.listings .item:last-child {
+    border-bottom: none;
+}
+
+.listings .item .title {
+    display: block;
+    color: #fff;
+    font-weight: 700;
+    font-size: medium;
+}
+
+.listings .item .title small {
+    font-weight: 400;
+}
+
+.listings .item.active .title,
+.listings .item .title:hover {
+    color: #8cc63f;
+}
+
+.listings .item.active {
+    background-color: #f8f8f8;
+}
+
+::-webkit-scrollbar {
+    width: 5px;
+    height: 3px;
+    border-left: 0;
+    background: rgba(0, 0, 0, 0.1);
+}
+
+::-webkit-scrollbar-track {
+    background: none;
+}
+
+::-webkit-scrollbar-thumb {
+    background: dimgrey;
+    border-radius: 0;
+}
+
+.clearfix {
+    display: block;
+}
+
+.clearfix::after {
+    content: '.';
+    display: block;
+    height: 0;
+    clear: both;
+    visibility: hidden;
+}
+
+
+/* Hand-written */
+#menu {
+    padding: 10px;
+    background: dimgray;
+    width: 100%;
+}
+
+#menu .header {
+    background: dimgray;
+    width: 270px;
+    position: absolute;
+    display: table-row;
+    vertical-align: top;
+    height: 254px;
+    line-height: 60px;
+}
+

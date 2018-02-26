@@ -15,7 +15,7 @@ var style = {
         "id": "open-street-map",
         "type": "raster",
         "source": "open-street-map",
-        "minzoom": 0,
+        "minzoom": 5,
         "maxzoom": 18
     }],
     "sprite": "mapbox://sprites/mapbox/streets-v8",
