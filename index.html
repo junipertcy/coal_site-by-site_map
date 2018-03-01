@@ -4,6 +4,8 @@
     <meta charset='utf-8'/>
     <title>Japan coal site-by-site map</title>
     <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no'/>
+
+
     <script src='node_modules/jquery/dist/jquery.min.js'></script>
     <script src="node_modules/leaflet/dist/leaflet.js"></script>
     <script src="node_modules/lodash/lodash.min.js"></script>
@@ -24,7 +26,7 @@
 
     <script src='assets/js/semantic.min.js'></script>
 
-    <link href='assets/css/test/styles.css' rel='stylesheet'>
+    <!--<link href='assets/css/test/styles.css' rel='stylesheet'>-->
     <link href='https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,700' rel='stylesheet'>
 
     <link href='assets/js/semantic.min.css' rel='stylesheet'>
@@ -42,20 +44,21 @@
                 これは何ですか？
             </button>
             &nbsp;
-            <button class="ui mini right labeled icon violet button" style="width: 120px;"><i class="icon right arrow"></i>
+            <button class="ui mini right labeled icon violet button" style="width: 120px;"><i
+                    class="icon right arrow"></i>
                 もっと詳しく知る
             </button>
             <hr>
         </div>
         <div id="picker">
             <h5>CHOOSE A POLLUTANT:</h5>
-            <button class="mini ui inverted blue icon button active"><i class="icon asterisk"></i>
+            <button class="mini ui inverted blue icon button active" onclick="selected_pollutant='no2';"><i class="icon asterisk"></i>
                 NO2
             </button>
-            <button class="mini ui inverted red icon button"><i class="icon asterisk"></i>
+            <button class="mini ui inverted red icon button" onclick="selected_pollutant='so2';"><i class="icon asterisk"></i>
                 SO2
             </button>
-            <button class="mini ui inverted red icon button"><i class="icon asterisk"></i>
+            <button class="mini ui inverted red icon button" onclick="selected_pollutant='pm25';"><i class="icon asterisk"></i>
                 PM2.5
             </button>
 
@@ -64,6 +67,14 @@
     <div id='listings' class='listings'></div>
     <div class='logo'></div>
 </nav>
+
+<script>
+    function sayHello() {
+        console.log("hello!");
+    }
+
+</script>
+
 
 <main id="panel">
     <button class="toggle-button">☰</button>
@@ -77,19 +88,19 @@
     </div>
 
     <!--<br> <h5 style="margin-top: 10px;">NO2 排出量（t / 年）：</h5>-->
-            <!--<div style="position: absolute; width: 40px;">-->
-                <!--<label id='month' style="color: white;"></label>-->
-            <!--</div>-->
-            <!--<input id='slider' style="margin-left: 40px;" type='range' min='0' max='11' step='1' value='0'/>-->
-
-
-
+    <!--<div style="position: absolute; width: 40px;">-->
+    <!--<label id='month' style="color: white;"></label>-->
+    <!--</div>-->
+    <!--<input id='slider' style="margin-left: 40px;" type='range' min='0' max='11' step='1' value='0'/>-->
     <div class="cartodb-timeslider" style="width: 200px; bottom: 20px; left: 20px;">
         <ul>
-            <li class="controls"><a href="#/play" class="button">play</a></li>
-            <li class="time"><p id="month" class="value">08:29</p></li>
+            <li class="controls" style="cursor:pointer" onclick="sayHello();">
+                <i class="fa fa-play fa-lg" style="margin-left: 20px; position: absolute; margin-top: 13px;"></i>
+            </li>
+
+            <li class="time"><p id="month" class="value"></p></li>
             <li class="last">
-                <input id='slider' style="margin-left: 40px;" type='range' min='0' max='11' step='1' value='0'/>
+                <input id='slider' style="margin-left: 15px;" type='range' min='0' max='11' step='1' value='0'/>
             </li>
         </ul>
     </div>
@@ -103,7 +114,6 @@
         'padding': 300,
         'tolerance': 70
     });
-
     // Toggle button
     document.querySelector('.toggle-button').addEventListener('click', function () {
         slideout.toggle();
@@ -112,7 +122,6 @@
 
 
 <script>
-
     var months = [
         '1 月',
         '2 月',
@@ -128,9 +137,9 @@
         '12 月'
     ];
 
-    function filterBy(month) {
+    function filterBy(month, layerName) {
         var filters = ['==', 'month', month];
-        map.setFilter('pollution-polygons', filters);
+        map.setFilter(layerName, filters);
         document.getElementById('month').textContent = months[month];
     }
 
@@ -172,7 +181,7 @@
         if (sourcedata.isSourceLoaded) {
             map.setMinZoom(5);
             map.setMaxZoom(16);
-// console.log(sourcedata);
+
             map.on('mouseenter', 'points', function () {
                 console.log("mouseenter events detected!");
                 map.getCanvas().style.cursor = 'pointer';
@@ -206,148 +215,33 @@
         }
     });
 
-    omnivore.kml('dataset/demo/japan30_no2_concentration_monthly.kml').on('ready', function (d) {
-        ls = d.target.getLayers();
 
-        for (var i = 0; i < ls.length; ++i) {
-            try {
-                var dd = ls[i].feature;
-                var c_ = [];
-                dd.geometry.coordinates[0].forEach(function (o) {
-                    var dropped = _.dropRight(o, 1);
-                    c_.push(dropped);
-                });
-                ls[i].feature.geometry.coordinates[0] = c_;
-            } catch (e) {
-                if (ls[i].feature.geometry.type === "Point") {
-                    ls[i].feature.geometry.coordinates = ls[i].feature.geometry.coordinates.slice(0, 2);
-                }
-            }
-        }
-        var pre_data = _.map(ls, 'feature');
-
-        pre_data.map(function (d) {
-            try {
-                d.properties.month = new Date(d.properties.timespan.end).getMonth();
-                if (d.properties.month === 0) {
-                    d.properties.month = 11;
-                } else {
-                    d.properties.month -= 1;
-                }
-            } catch (e) {
-                d.properties.month = 12;  // always present
-            }
-            try {
-                d.properties.color = getColor(d.properties.name);
-            } catch (e) {
-                console.log(d);
-            }
-
-            return d;
-        });
-
-        console.log(pre_data);
-        map.addSource('pollutions', {
-            'type': 'geojson',
-            'data': {
-                "type": "FeatureCollection",
-                "features": _.map(ls, 'feature')
-            }
-        });
-
+    map.loadImage('assets/css/img/factoryTransp3.png', function (error, image) {
+        if (error) throw error;
+        map.addImage('industry', image);
         map.addLayer({
-            'id': 'pollution-polygons',
-            'type': 'fill',
+            "id": "points",
+            "type": "symbol",
             "interactive": true,
-            'source': 'pollutions',
-            'paint': {
-                'fill-color': {"type": "identity", "property": "color"},
-                'fill-opacity': 0.5,
-                'fill-outline-color': "white"
-
+            "source": {
+                "type": "geojson",
+                "data": plants
+            },
+            "layout": {
+                "icon-image": "industry",
+                "icon-size": 0.08,
+                'icon-ignore-placement': true,
+                'icon-allow-overlap': true
             }
         });
-
-
-        map.loadImage('assets/css/img/factoryTransp3.png', function (error, image) {
-            if (error) throw error;
-            map.addImage('industry', image);
-            map.addLayer({
-                "id": "points",
-                "type": "symbol",
-                "interactive": true,
-                "source": {
-                    "type": "geojson",
-                    "data": plants
-                },
-                "layout": {
-                    "icon-image": "industry",
-                    "icon-size": 0.08,
-                    'icon-ignore-placement': true,
-                    'icon-allow-overlap': true
-                }
-            });
-        });
-        buildLocationList(plants);
-
-
-        filterBy(0);  // January
-
-        document.getElementById('slider').addEventListener('input', function (e) {
-            var month = parseInt(e.target.value);
-            filterBy(month);
-        });
-
-        var colors = [];
-        for (i = 0; i < pre_data.length; i++) {
-            var layer = pre_data[i].properties.name;
-            var color;
-
-            var item = document.createElement('div');
-            var key = document.createElement('div');
-            var value = document.createElement('span');
-
-            if (colors.length === 3) {
-                continue;
-            }
-            if (layer === "0.05 - 0.1") {
-                if (_.indexOf(colors, "#5990e2") === -1) {
-                    color = "#5990e2";
-                    value.style.bottom = '35px';
-                } else {
-                    continue;
-                }
-            } else if (layer === "0.1 - 0.2") {
-                if (_.indexOf(colors, "#FCA107") === -1) {
-                    color = "#FCA107";
-                    value.style.bottom = '20px';
-                } else {
-                    continue;
-                }
-            } else if (layer === "0.2 - 0.3") {
-                if (_.indexOf(colors, "#7f3121") === -1) {
-                    color = "#7f3121";
-                    value.style.bottom = '5px';
-                } else {
-                    continue;
-                }
-            }
-
-            key.className = 'bar';
-            key.style.background = color;
-
-            value.style.position = "absolute";
-            value.style.marginLeft = "10px";
-            value.style.color = 'white';
-
-            value.innerHTML = layer;
-            item.appendChild(key);
-            item.appendChild(value);
-            legend.appendChild(item);
-            colors.push(color);
-        }
     });
+    buildLocationList(plants);
+
+
+
+
 </script>
 <!--<script src="assets/js/sidebar_handler.js"></script>-->
+<link href="node_modules/font-awesome/css/font-awesome.min.css" rel="stylesheet">
 </body>
 </html>

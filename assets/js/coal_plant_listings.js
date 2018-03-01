@@ -1,3 +1,4 @@
+var selected_pollutant = "no2";
 var plants = {'features': [{'geometry': {'coordinates': [138.7134, 35.1435],
     'type': 'Point'},
    'properties': {'capacity': '11.2 [万kW]',

@@ -88,7 +88,7 @@ a:hover {
     border-bottom: 1px solid #eee;
     padding: 10px;
     text-decoration: none;
-    color: whitesmoke;
+    color: darkslategray;
 }
 
 p.hint {
@@ -115,7 +115,7 @@ p.hint {
 
 .listings .item.active .title,
 .listings .item .title:hover {
-    color: #8cc63f;
+    color: slategrey;
 }
 
 .listings .item.active {
@@ -134,7 +134,7 @@ p.hint {
 }
 
 ::-webkit-scrollbar-thumb {
-    background: dimgrey;
+    background: #f8f8f8;
     border-radius: 0;
 }
 

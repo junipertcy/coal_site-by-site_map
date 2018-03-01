@@ -6,6 +6,140 @@ function flyToStore(currentFeature) {
 }
 
 function createPopUp(currentFeature) {
+    var id = currentFeature.properties.id.slice(2);
+    console.log("hey ID = ", id);
+    console.log("selected = ", selected_pollutant);
+
+
+    omnivore.kml('dataset/japan' + id + '_' + selected_pollutant + '_concentration_monthly.kml').on('ready', function (d) {
+        var sourceName = selected_pollutant + '_' + id;
+        var layerName = sourceName + "_layer";
+        ls = d.target.getLayers();
+
+        for (var i = 0; i < ls.length; ++i) {
+            try {
+                var dd = ls[i].feature;
+                var c_ = [];
+                dd.geometry.coordinates[0].forEach(function (o) {
+                    var dropped = _.dropRight(o, 1);
+                    c_.push(dropped);
+                });
+                ls[i].feature.geometry.coordinates[0] = c_;
+            } catch (e) {
+                if (ls[i].feature.geometry.type === "Point") {
+                    ls[i].feature.geometry.coordinates = ls[i].feature.geometry.coordinates.slice(0, 2);
+                }
+            }
+        }
+        var pre_data = _.map(ls, 'feature');
+
+        pre_data.map(function (d) {
+            try {
+                d.properties.month = new Date(d.properties.timespan.end).getMonth();
+                if (d.properties.month === 0) {
+                    d.properties.month = 11;
+                } else {
+                    d.properties.month -= 1;
+                }
+            } catch (e) {
+                d.properties.month = 12;  // always present
+            }
+            try {
+                d.properties.color = getColor(d.properties.name);
+            } catch (e) {
+                console.log(d);
+            }
+
+            return d;
+        });
+        console.log('pre_data = ', pre_data);
+        map.addSource(sourceName, {
+            'type': 'geojson',
+            'data': {
+                "type": "FeatureCollection",
+                "features": _.map(ls, 'feature')
+            }
+        });
+        // try {s
+        //     map.removeLayer('pollution-polygons');
+        // } catch (e) {
+        //     console.log(e);
+        // }
+        // try {
+        //     map.removeSource('pollutions');s
+        // } catch (e) {
+        //     console.log(e);
+        // }
+        map.addLayer({
+            'id': layerName,
+            'type': 'fill',
+            "interactive": true,
+            'source': sourceName,
+            'paint': {
+                'fill-color': {"type": "identity", "property": "color"},
+                'fill-opacity': 0.5,
+                'fill-outline-color': "white"
+
+            }
+        });
+
+        filterBy(0, layerName);  // January
+
+        document.getElementById('slider').addEventListener('input', function (e) {
+            var month = parseInt(e.target.value);
+            filterBy(month, layerName);
+        });
+        var colors = [];
+        for (i = 0; i < pre_data.length; i++) {
+            var layer = pre_data[i].properties.name;
+            var color;
+
+            var item = document.createElement('div');
+            var key = document.createElement('div');
+            var value = document.createElement('span');
+
+            if (colors.length === 3) {
+                continue;
+            }
+            if (layer === "0.05 - 0.1") {
+                if (_.indexOf(colors, "#5990e2") === -1) {
+                    color = "#5990e2";
+                    value.style.bottom = '35px';
+                } else {
+                    continue;
+                }
+            } else if (layer === "0.1 - 0.2") {
+                if (_.indexOf(colors, "#FCA107") === -1) {
+                    color = "#FCA107";
+                    value.style.bottom = '20px';
+                } else {
+                    continue;
+                }
+            } else if (layer === "0.2 - 0.3") {
+                if (_.indexOf(colors, "#7f3121") === -1) {
+                    color = "#7f3121";
+                    value.style.bottom = '5px';
+                } else {
+                    continue;
+                }
+            }
+
+            key.className = 'bar';
+            key.style.background = color;
+
+            value.style.position = "absolute";
+            value.style.marginLeft = "10px";
+            value.style.color = 'white';
+
+            value.innerHTML = layer;
+            item.appendChild(key);
+            item.appendChild(value);
+            legend.appendChild(item);
+            colors.push(color);
+        }
+
+    });
+
     var popUps = document.getElementsByClassName('mapboxgl-popup');
     // Check if there is already a popup on the map and if so, remove it
     if (popUps[0]) popUps[0].remove();
@@ -122,7 +256,6 @@ function buildLocationList(data) {
     }
 
 }
-
 
 
 function kml2hex(kml_str) {

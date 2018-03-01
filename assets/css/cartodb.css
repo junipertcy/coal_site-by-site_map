@@ -3364,7 +3364,7 @@ div.cartodb-timeslider {
   position: absolute;
   display: inline-block;
   height: 40px;
-  width: auto !important;
+  width: 280px !important;
   margin-bottom: 30px;
   padding: 0;
   -webkit-box-shadow: rgba(0, 0, 0, 0.2) 0 0 4px 2px;
@@ -3398,8 +3398,8 @@ div.cartodb-timeslider ul li {
   vertical-align: top;
   height: 40px;
   _height: 40px;
-  width: auto;
-  line-height: 40px;
+  width: 50px;
+  line-height: 45px;
   border-right: 1px solid #E5E5E5;
 }
 
@@ -3430,7 +3430,7 @@ div.cartodb-timeslider a.button.stop:hover {
 }
 
 div.cartodb-timeslider p {
-  width: 120px;
+  width: 50px;
   height: 40px;
   margin: 0;
   padding: 0 5px 0 0;
