@@ -5,7 +5,6 @@
     <title>Japan coal site-by-site map</title>
     <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no'/>
 
-
     <script src='node_modules/jquery/dist/jquery.min.js'></script>
     <script src="node_modules/leaflet/dist/leaflet.js"></script>
     <script src="node_modules/lodash/lodash.min.js"></script>
@@ -35,6 +34,36 @@
 </head>
 <body>
 
+<script>
+    let is_play = false;
+    let month = 0;
+    let _layerName = '';
+    let _id;
+    let _pollutant;
+</script>
+
+<script>
+    let timer;
+    function play(layerName) {
+        $('#listing' + '-'+ _id).addClass('active');
+
+        if (!is_play) {
+            $('#play_button').removeClass('fa fa-play fa-lg').addClass('fa fa-pause fa-lg');
+            timer = setInterval(function(){
+                $("input[type='range']")[0].value = (month % 12).toString();
+                filterBy(month % 12, layerName);
+                month += 1;
+            }, 500);
+        } else {
+            $('#play_button').removeClass('fa fa-pause fa-lg').addClass('fa fa-play fa-lg');
+            clearInterval(timer);
+        }
+        console.log(timer);
+        is_play = !is_play;
+    }
+</script>
+
+
 <nav id="menu">
     <div class="header">
         <hr>
@@ -52,29 +81,23 @@
         </div>
         <div id="picker">
             <h5>CHOOSE A POLLUTANT:</h5>
-            <button class="mini ui inverted blue icon button active" onclick="selected_pollutant='no2';"><i class="icon asterisk"></i>
+            <button class="mini ui inverted blue icon toggle button" onclick="selected_pollutant='no2';" id="no2_button">
+                <i class="icon asterisk"></i>
                 NO2
             </button>
-            <button class="mini ui inverted red icon button" onclick="selected_pollutant='so2';"><i class="icon asterisk"></i>
+            <button class="mini ui inverted blue icon toggle button" onclick="selected_pollutant='so2';" id="so2_button">
+                <i class="icon asterisk"></i>
                 SO2
             </button>
-            <button class="mini ui inverted red icon button" onclick="selected_pollutant='pm25';"><i class="icon asterisk"></i>
+            <button class="mini ui inverted blue icon toggle button" onclick="selected_pollutant='pm25';" id="pm25_button">
+                <i class="icon asterisk"></i>
                 PM2.5
             </button>
-
         </div>
     </div>
     <div id='listings' class='listings'></div>
     <div class='logo'></div>
 </nav>
-
-<script>
-    function sayHello() {
-        console.log("hello!");
-    }
-
-</script>
-
 
 <main id="panel">
     <button class="toggle-button">☰</button>
@@ -94,8 +117,8 @@
     <!--<input id='slider' style="margin-left: 40px;" type='range' min='0' max='11' step='1' value='0'/>-->
     <div class="cartodb-timeslider" style="width: 200px; bottom: 20px; left: 20px;">
         <ul>
-            <li class="controls" style="cursor:pointer" onclick="sayHello();">
-                <i class="fa fa-play fa-lg" style="margin-left: 20px; position: absolute; margin-top: 13px;"></i>
+            <li class="controls" style="cursor:pointer" onclick="play(_layerName);">
+                <i class="fa fa-play fa-lg" style="margin-left: 20px; position: absolute; margin-top: 13px;" id="play_button"></i>
             </li>
 
             <li class="time"><p id="month" class="value"></p></li>
@@ -108,7 +131,7 @@
 <script src="node_modules/slideout/dist/slideout.js"></script>
 
 <script>
-    var slideout = new Slideout({
+    let slideout = new Slideout({
         'panel': document.getElementById('panel'),
         'menu': document.getElementById('menu'),
         'padding': 300,
@@ -122,7 +145,7 @@
 
 
 <script>
-    var months = [
+    let months = [
         '1 月',
         '2 月',
         '3 月',
@@ -138,14 +161,14 @@
     ];
 
     function filterBy(month, layerName) {
-        var filters = ['==', 'month', month];
+        let filters = ['==', 'month', month];
         map.setFilter(layerName, filters);
         document.getElementById('month').textContent = months[month];
     }
 
     mapboxgl.accessToken = 'pk.eyJ1IjoianVuaXBlcnRjeSIsImEiOiJvOFg5WFVjIn0.7NDB1oOLpq3A5qO7vLaQSA';
 
-    var map = new mapboxgl.Map({
+    let map = new mapboxgl.Map({
         container: 'panel',
         style: style,
         center: [135.43366015639952, 38.37210580471424],
@@ -167,14 +190,14 @@
 
     //
     // Holds visible plant features for filtering
-    var _plants = [];
+    let _plants = [];
     // Create a popup, but don't add it to the map yet.
-    var _little_popup = new mapboxgl.Popup({
+    let _little_popup = new mapboxgl.Popup({
         closeButton: false
     });
 
-    var filterEl = document.getElementById('feature-filter');
-    var listingEl = document.getElementById('feature-listing');
+    let filterEl = document.getElementById('feature-filter');
+    let listingEl = document.getElementById('feature-listing');
 
     // Map interactions
     map.on('sourcedata', function (sourcedata) {
@@ -192,23 +215,23 @@
             });
 
             map.on('click', function (e) {
-                var features = map.queryRenderedFeatures(e.point, {layers: ['points']});
+                let features = map.queryRenderedFeatures(e.point, {layers: ['points']});
                 if (features.length) {
-                    var clickedPoint = features[0];
+                    let clickedPoint = features[0];
                     flyToStore(clickedPoint);
                     createPopUp(clickedPoint);
-                    var activeItem = document.getElementsByClassName('active');
+                    let activeItem = document.getElementsByClassName('active');
                     if (activeItem[0]) {
                         activeItem[0].classList.remove('active');
                     }
-                    var selectedFeature = clickedPoint.properties.id;
+                    let selectedFeature = clickedPoint.properties.id;
 
-                    for (var i = 0; i < plants.features.length; i++) {
+                    for (let i = 0; i < plants.features.length; i++) {
                         if (plants.features[i].properties.id === selectedFeature) {
                             selectedFeatureIndex = i;
                         }
                     }
-                    var listing = document.getElementById('listing-' + selectedFeatureIndex);
+                    let listing = document.getElementById('listing-' + selectedFeatureIndex);
                     listing.classList.add('active');
                 }
             });
