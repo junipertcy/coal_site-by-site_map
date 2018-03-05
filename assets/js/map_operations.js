@@ -5,18 +5,19 @@ function flyToStore(currentFeature) {
     });
 }
 
-function createPopUp(currentFeature) {
-    let id = currentFeature.properties.id.slice(2);
-    console.log("hey ID = ", id);
-    console.log("selected = ", selected_pollutant);
+function hightlightCoalPlant(){
 
-    omnivore.kml('dataset/japan' + id + '_' + selected_pollutant + '_concentration_monthly.kml').on('ready', function (d) {
-        let sourceName = selected_pollutant + '_' + id;
+}
+
+
+function downloadSource(id, pollutant, cb) {
+    omnivore.kml('dataset/japan' + id + '_' + pollutant + '_concentration_monthly.kml').on('ready', function (d) {
+        let sourceName = pollutant + '_' + id;
         let layerName = sourceName + "_layer";
-        _layerName = layerName;
-        _id = id;
-        _pollutant = selected_pollutant;
         ls = d.target.getLayers();
+
+        state._id = id;
+        state._layerName = layerName;
 
         for (let i = 0; i < ls.length; ++i) {
             try {
@@ -54,8 +55,7 @@ function createPopUp(currentFeature) {
 
             return d;
         });
-        console.log('pre_data = ', pre_data);
-
+        console.log("Download sourceName = ", sourceName);
         map.addSource(sourceName, {
             'type': 'geojson',
             'data': {
@@ -63,76 +63,87 @@ function createPopUp(currentFeature) {
                 "features": _.map(ls, 'feature')
             }
         });
-        map.addLayer({
-            'id': layerName,
-            'type': 'fill',
-            "interactive": true,
-            'source': sourceName,
-            'paint': {
-                'fill-color': {"type": "identity", "property": "color"},
-                'fill-opacity': 0.5,
-                'fill-outline-color': "white"
-
-            }
-        });
-
-        filterBy(0, layerName);  // January
-
-        document.getElementById('slider').addEventListener('input', function (e) {
-            let month = parseInt(e.target.value);
-            filterBy(month, layerName);
-        });
-
-        let colors = [];
-        for (let i = 0; i < pre_data.length; i++) {
-            let layer = pre_data[i].properties.name;
-            let color;
-
-            let item = document.createElement('div');
-            let key = document.createElement('div');
-            let value = document.createElement('span');
-
-            if (colors.length === 3) {
-                continue;
-            }
-            if (layer === "0.05 - 0.1") {
-                if (_.indexOf(colors, "#5990e2") === -1) {
-                    color = "#5990e2";
-                    value.style.bottom = '35px';
-                } else {
-                    continue;
-                }
-            } else if (layer === "0.1 - 0.2") {
-                if (_.indexOf(colors, "#FCA107") === -1) {
-                    color = "#FCA107";
-                    value.style.bottom = '20px';
-                } else {
-                    continue;
-                }
-            } else if (layer === "0.2 - 0.3") {
-                if (_.indexOf(colors, "#7f3121") === -1) {
-                    color = "#7f3121";
-                    value.style.bottom = '5px';
-                } else {
-                    continue;
-                }
-            }
-
-            key.className = 'bar';
-            key.style.background = color;
-
-            value.style.position = "absolute";
-            value.style.marginLeft = "10px";
-            value.style.color = 'white';
-
-            value.innerHTML = layer;
-            item.appendChild(key);
-            item.appendChild(value);
-            legend.appendChild(item);
-            colors.push(color);
-        }
-
+        state.availableSources[pollutant].add(id);
+        cb(sourceName, layerName);
     });
+}
+
+
+function createPopUp(currentFeature) {
+    let id = currentFeature.properties.id.slice(2);
+    console.log("hey ID = ", id);
+
+
+    // downloadSource(id, state._pollutant, function(sourceName, layerName) {
+    //     // map.addLayer({
+    //     //     'id': layerName,
+    //     //     'type': 'fill',
+    //     //     "interactive": true,
+    //     //     'source': sourceName,
+    //     //     'paint': {
+    //     //         'fill-color': {"type": "identity", "property": "color"},
+    //     //         'fill-opacity': 0.5,
+    //     //         'fill-outline-color': "white"
+    //     //
+    //     //     }
+    //     // });
+    //     //
+    //     // filterBy(0, layerName);  // January
+    //     //
+    //     // document.getElementById('slider').addEventListener('input', function (e) {
+    //     //     let month = parseInt(e.target.value);
+    //     //     filterBy(month, layerName);
+    //     // });
+    //
+    //     let colors = [];
+    //     for (let i = 0; i < pre_data.length; i++) {
+    //         let layer = pre_data[i].properties.name;
+    //         let color;
+    //
+    //         let item = document.createElement('div');
+    //         let key = document.createElement('div');
+    //         let value = document.createElement('span');
+    //
+    //         if (colors.length === 3) {
+    //             continue;
+    //         }
+    //         if (layer === "0.05 - 0.1") {
+    //             if (_.indexOf(colors, "#5990e2") === -1) {
+    //                 color = "#5990e2";
+    //                 value.style.bottom = '35px';
+    //             } else {
+    //                 continue;
+    //             }
+    //         } else if (layer === "0.1 - 0.2") {
+    //             if (_.indexOf(colors, "#FCA107") === -1) {
+    //                 color = "#FCA107";
+    //                 value.style.bottom = '20px';
+    //             } else {
+    //                 continue;
+    //             }
+    //         } else if (layer === "0.2 - 0.3") {
+    //             if (_.indexOf(colors, "#7f3121") === -1) {
+    //                 color = "#7f3121";
+    //                 value.style.bottom = '5px';
+    //             } else {
+    //                 continue;
+    //             }
+    //         }
+    //
+    //         key.className = 'bar';
+    //         key.style.background = color;
+    //
+    //         value.style.position = "absolute";
+    //         value.style.marginLeft = "10px";
+    //         value.style.color = 'white';
+    //
+    //         value.innerHTML = layer;
+    //         item.appendChild(key);
+    //         item.appendChild(value);
+    //         legend.appendChild(item);
+    //         colors.push(color);
+    //     }
+    // });
 
     let popUps = document.getElementsByClassName('mapboxgl-popup');
     // Check if there is already a popup on the map and if so, remove it
@@ -191,14 +202,14 @@ function createPopUp(currentFeature) {
     close_button[0].style['background-image'] = "url(data:image/svg+xml;base64,PHN2ZyB4bWxuczpzdmc9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyMCAyMCIgdmVyc2lvbj0iMS4xIiBoZWlnaHQ9IjIwIiB3aWR0aD0iMjAiPg0KICA8cGF0aCBkPSJtNSA1IDAgMS41IDMuNSAzLjUtMy41IDMuNSAwIDEuNSAxLjUgMCAzLjUtMy41IDMuNSAzLjUgMS41IDAgMC0xLjUtMy41LTMuNSAzLjUtMy41IDAtMS41LTEuNSAwLTMuNSAzLjUtMy41LTMuNS0xLjUgMHoiIGZpbGw9IiMwMDAiLz4NCjwvc3ZnPg==)";
 
     popup.on('close', function (e) {
-        // let activeItem = document.getElementsByClassName('active');
-        // if (activeItem[0]) {
-        //     activeItem[0].classList.remove('active');
-        //     map.flyTo({
-        //         // center: [142.61871875040669, 38.13053360748921],
-        //         // zoom: 5
-        //     })
-        // }
+        let activeItem = document.getElementsByClassName('active');
+        if (activeItem[0]) {
+            activeItem[0].classList.remove('active');
+            map.flyTo({
+                // center: [142.61871875040669, 38.13053360748921],
+                // zoom: 5
+            })
+        }
 
     });
 }
@@ -229,19 +240,30 @@ function buildLocationList(data) {
         // Create a new div with the class 'details' for each store
         // and fill it with the city and phone number
         let details = listing.appendChild(document.createElement('div'));
-        details.innerHTML = prop.capacity;
+
+        let checkbox = details.appendChild(document.createElement('div'));
+        checkbox.className = 'ui checkbox';
+        let input = checkbox.appendChild(document.createElement('input'));
+        input.type = 'checkbox';
+        input.name = prop.id.slice(2);
+        let label = checkbox.appendChild(document.createElement('label'));
+        label.innerHTML = prop.capacity;
         if (prop.status) {
-            details.innerHTML += ' &middot; ' + prop.status;
+            label.innerHTML += ' &middot; ' + prop.status;
         }
+
         // Add an event listener for the links in the sidebar listing
         link.addEventListener('click', function (e) {
+            console.log("You clicked the list!");
             let clickedListing = data.features[this.dataPosition];
             flyToStore(clickedListing);
             createPopUp(clickedListing);
             let activeItem = document.getElementsByClassName('active');
+
             if (activeItem[0]) {
                 activeItem[0].classList.remove('active');
             }
+
             this.parentNode.classList.add('active');
 
 

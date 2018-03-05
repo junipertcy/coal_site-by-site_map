@@ -1,5 +1,4 @@
-var selected_pollutant = "no2";
-var plants = {'features': [{'geometry': {'coordinates': [138.7134, 35.1435],
+let plants = {'features': [{'geometry': {'coordinates': [138.7134, 35.1435],
     'type': 'Point'},
    'properties': {'capacity': '11.2 [万kW]',
     'fuels_used': 'Case1：石炭専焼\u3000Case2：石炭＋木質（3cal%混焼）\u3000Case3：石炭＋木質（33cal%混焼）',

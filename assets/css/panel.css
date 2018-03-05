@@ -22,7 +22,7 @@ body {
 .mapbox-attribution-container {
     z-index: 1000;
     bottom: 0;
-    right: 0.5%;
+    right: 5px;
     position: absolute;
     display: block;
 }

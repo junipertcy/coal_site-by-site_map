@@ -23,43 +23,120 @@
     <script src='assets/js/coal_plant_listings.js'></script>
     <script src='assets/js/map_style.js'></script>
 
-    <script src='assets/js/semantic.min.js'></script>
-
+    <script src='assets/js/semantic/dist/semantic.min.js'></script>
+    <script src='node_modules/watchjs/src/watch.min.js'></script>
     <!--<link href='assets/css/test/styles.css' rel='stylesheet'>-->
     <link href='https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,700' rel='stylesheet'>
 
-    <link href='assets/js/semantic.min.css' rel='stylesheet'>
+    <link href='assets/js/semantic/dist/semantic.min.css' rel='stylesheet'>
     <link href='assets/css/slider.css' rel='stylesheet'>
     <link href='assets/css/cartodb.css' rel='stylesheet'>
 </head>
 <body>
 
 <script>
-    let is_play = false;
-    let month = 0;
-    let _layerName = '';
-    let _id;
-    let _pollutant;
+    // let is_play = false;
+    // let month = 0;
+    // let _layerName = '';
+    // let _id;
+    // let _pollutant;
+    let isSlideOut = false;
+    //defining our object however we like
+    let state = {
+        is_play: false,
+        isPollutantSelected: false,
+        month: 0,
+        _layerName: '',
+        _id: '',
+        _pollutant: '',
+        availableSources: {
+            "no2": new Set(),
+            "pm25": new Set(),
+            "so2": new Set()
+        },
+        existingLayers: new Set(),
+        activeLayers: new Set()
+    };
+
+    async function downloadSources(activeLayers) {
+        for (let layer of activeLayers) {
+            if (!state.availableSources[state._pollutant].has(layer)) {
+                const result = await downloadSource(layer, state._pollutant, function () {
+                    console.log(state);
+                });
+            }
+        }
+    }
+
+    function showActiveLayers(activeLayers) {
+        state.existingLayers.forEach(function (o) {
+            map.removeLayer(o);
+        });
+        state.existingLayers = new Set();
+        for (let layer of activeLayers) {
+            map.addLayer({
+                'id': state._pollutant + "_" + layer + "_layer",
+                'type': 'fill',
+                "interactive": true,
+                'source': state._pollutant + "_" + layer,
+                'paint': {
+                    'fill-color': {"type": "identity", "property": "color"},
+                    'fill-opacity': 0.5,
+                    'fill-outline-color': "white"
+
+                }
+            });
+            state.existingLayers.add(state._pollutant + "_" + layer + "_layer");
+            filterBy(0, state._pollutant + "_" + layer + "_layer");  // January
+            document.getElementById('slider').addEventListener('input', function (e) {
+                let month = parseInt(e.target.value);
+                filterBy(month, state._pollutant + "_" + layer + "_layer");
+            });
+        }
+    }
+
+    //defining a 'watcher' for an attribute
+    watch(state, ["_pollutant"], function () {
+        console.log("_pollutant changed: ", state._pollutant);
+        let isLayerChecked = $('div').find('input');
+        let checkedLayer;
+
+        if (isLayerChecked.is(':checked')) {
+            checkedLayer = _.filter(isLayerChecked, function (o) {
+                return o.checked;
+            });
+
+            let activeLayers = _.map(checkedLayer, 'name');
+            console.log(activeLayers);
+            if (state._pollutant !== "") {
+                downloadSources(activeLayers);
+                showActiveLayers(activeLayers);
+            }
+        }
+    });
 </script>
 
 <script>
     let timer;
-    function play(layerName) {
-        $('#listing' + '-'+ _id).addClass('active');
 
-        if (!is_play) {
+    function play(layerNames) {
+        // $('#listing' + '-' + state._id).addClass('active');
+        if (!state.is_play) {
             $('#play_button').removeClass('fa fa-play fa-lg').addClass('fa fa-pause fa-lg');
-            timer = setInterval(function(){
-                $("input[type='range']")[0].value = (month % 12).toString();
-                filterBy(month % 12, layerName);
-                month += 1;
+            timer = setInterval(function () {
+                $("input[type='range']")[0].value = (state.month % 12).toString();
+                layerNames.forEach(function (o) {
+                    console.log("layerName = ", o);
+                    filterBy(state.month % 12, o);
+                });
+                state.month += 1;
             }, 500);
         } else {
             $('#play_button').removeClass('fa fa-pause fa-lg').addClass('fa fa-play fa-lg');
             clearInterval(timer);
         }
         console.log(timer);
-        is_play = !is_play;
+        state.is_play = !state.is_play;
     }
 </script>
 
@@ -81,17 +158,24 @@
         </div>
         <div id="picker">
             <h5>CHOOSE A POLLUTANT:</h5>
-            <button class="mini ui inverted blue icon toggle button" onclick="selected_pollutant='no2';" id="no2_button">
-                <i class="icon asterisk"></i>
+            <button class="mini ui inverted green icon toggle button"
+                    onclick="selectPollutant('no2');">
+                <i class="icon asterisk" id="no2_button"></i>
                 NO2
             </button>
-            <button class="mini ui inverted blue icon toggle button" onclick="selected_pollutant='so2';" id="so2_button">
-                <i class="icon asterisk"></i>
+            <button class="mini ui inverted green icon toggle button"
+                    onclick="selectPollutant('so2');">
+                <i class="icon asterisk" id="so2_button"></i>
                 SO2
             </button>
-            <button class="mini ui inverted blue icon toggle button" onclick="selected_pollutant='pm25';" id="pm25_button">
-                <i class="icon asterisk"></i>
+            <button class="mini ui inverted green icon toggle button"
+                    onclick="selectPollutant('pm25');">
+                <i class="icon asterisk" id="pm25_button"></i>
                 PM2.5
+            </button>
+            <button class="mini ui inverted blue icon toggle button" onclick="console.log('update');">
+                <i class="sync alternate icon" id="update_button"></i>
+                更新
             </button>
         </div>
     </div>
@@ -103,22 +187,25 @@
     <button class="toggle-button">☰</button>
     <div class="mapbox-attribution-container">
         <a href="https://www.mapbox.com/about/maps/">© Mapbox | </a>
-        <a href="https://www.openstreetmap.org/copyright">© OpenStreetMap | </a>
-        <a href="" target="_blank"><strong>Improve this map</strong></a>
+        <a href="https://www.openstreetmap.org/copyright">© OpenStreetMap</a>
+        <!--<a href="" target="_blank"><strong>Improve this map</strong></a>-->
     </div>
-    <div id='legend' class='legend'>
-        <div style="font-weight: bold; color: white;">濃度 (ppm)</div>
-    </div>
+    <!--<div id='legend' class='legend'>-->
+    <!--<div style="font-weight: bold; color: white;">濃度 (ppm)</div>-->
+    <!--</div>-->
 
     <!--<br> <h5 style="margin-top: 10px;">NO2 排出量（t / 年）：</h5>-->
     <!--<div style="position: absolute; width: 40px;">-->
     <!--<label id='month' style="color: white;"></label>-->
     <!--</div>-->
     <!--<input id='slider' style="margin-left: 40px;" type='range' min='0' max='11' step='1' value='0'/>-->
+
+
     <div class="cartodb-timeslider" style="width: 200px; bottom: 20px; left: 20px;">
         <ul>
-            <li class="controls" style="cursor:pointer" onclick="play(_layerName);">
-                <i class="fa fa-play fa-lg" style="margin-left: 20px; position: absolute; margin-top: 13px;" id="play_button"></i>
+            <li class="controls" style="cursor:pointer" onclick="play(state.existingLayers);">
+                <i class="fa fa-play fa-lg" style="margin-left: 20px; position: absolute; margin-top: 13px;"
+                   id="play_button"></i>
             </li>
 
             <li class="time"><p id="month" class="value"></p></li>
@@ -135,12 +222,40 @@
         'panel': document.getElementById('panel'),
         'menu': document.getElementById('menu'),
         'padding': 300,
-        'tolerance': 70
+        'tolerance': 70,
+        'touch': false
     });
     // Toggle button
     document.querySelector('.toggle-button').addEventListener('click', function () {
         slideout.toggle();
+        isSlideOut = !isSlideOut;
+        if (isSlideOut) {
+            $('.mapboxgl-ctrl-top-right').css('transition-timing-function', 'linear').css('right', '300px');
+            $('.mapbox-attribution-container').css('transition-timing-function', 'linear').css('right', '305px');
+        } else {
+            $('.mapboxgl-ctrl-top-right').css('right', '0px');
+            $('.mapbox-attribution-container').css('right', '5px');
+        }
     });
+
+</script>
+
+<script>
+    function selectPollutant(pollutant) {
+        state._pollutant = pollutant;
+        $('#' + pollutant + '_button').parent().addClass('active').siblings().removeClass('active');
+        // if ((isButtonClicked && !state.isPollutantSelected) || (!isButtonClicked && state.isPollutantSelected)) {
+        //     state._pollutant = pollutant;
+        //     $('#' + pollutant + '_button').parent().addClass('active').siblings().removeClass('active');
+        // } else if (isButtonClicked && state.isPollutantSelected || (!isButtonClicked && state.isPollutantSelected === "")) {
+        //     $('#' + pollutant + '_button').parent().removeClass('active');
+        //     state._pollutant = "";
+        // }
+        // if (isButtonClicked) {
+        //     state.isPollutantSelected = !state.isPollutantSelected;
+        // }
+    }
+
 </script>
 
 
@@ -185,10 +300,10 @@
 
 
     map.on('click', function (e) {
+        selectPollutant(state._pollutant);
         console.log(e);
     });
 
-    //
     // Holds visible plant features for filtering
     let _plants = [];
     // Create a popup, but don't add it to the map yet.
@@ -215,6 +330,7 @@
             });
 
             map.on('click', function (e) {
+                console.log("You clicked the icon!");
                 let features = map.queryRenderedFeatures(e.point, {layers: ['points']});
                 if (features.length) {
                     let clickedPoint = features[0];
@@ -257,14 +373,41 @@
                 'icon-allow-overlap': true
             }
         });
+        map.loadImage('assets/css/img/factoryTransp3_red.png', function (error, image) {
+            map.addImage('industry_red', image);
+            map.addLayer({
+                "id": "points-hover",
+                "type": "symbol",
+                "interactive": true,
+                "source": {
+                    "type": "geojson",
+                    "data": plants
+                },
+
+                "filter": ["==", "name", ""],
+                "layout": {
+                    "icon-image": "industry_red",
+                    "icon-size": 0.08,
+                    'icon-ignore-placement': true,
+                    'icon-allow-overlap': true
+                }
+            });
+            map.on("mousemove", "points", function (e) {
+                map.setFilter("points-hover", ["==", "name", e.features[0].properties.name]);
+            });
+
+            // Reset the state-fills-hover layer's filter when the mouse leaves the layer.
+            map.on("mouseleave", "points", function () {
+                map.setFilter("points-hover", ["==", "name", ""]);
+            });
+        });
     });
     buildLocationList(plants);
 
-
-
-
 </script>
 <!--<script src="assets/js/sidebar_handler.js"></script>-->
+
+
 <link href="node_modules/font-awesome/css/font-awesome.min.css" rel="stylesheet">
 </body>
 </html>
