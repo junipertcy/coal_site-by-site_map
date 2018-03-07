@@ -48,14 +48,16 @@ function downloadSource(id, pollutant, cb) {
                 d.properties.month = 12;  // always present
             }
             try {
-                d.properties.color = getColor(d.properties.name);
+                let color = d3.interpolateLab("#ffffb2", "#b10026");
+                // console.log('d.properties.name =', d.properties.name);
+                d.properties.color = color(parseFloat(d.properties.name.split(" - ")[0]));
             } catch (e) {
                 console.log(d);
             }
 
             return d;
         });
-        console.log("Download sourceName = ", sourceName);
+        console.log("[INFO] sourceName = ", sourceName, " Downloaded!");
         map.addSource(sourceName, {
             'type': 'geojson',
             'data': {
@@ -71,9 +73,7 @@ function downloadSource(id, pollutant, cb) {
 
 function createPopUp(currentFeature) {
     let id = currentFeature.properties.id.slice(2);
-    console.log("hey ID = ", id);
-
-
+    // console.log("hey ID = ", id);
     // downloadSource(id, state._pollutant, function(sourceName, layerName) {
     //     // map.addLayer({
     //     //     'id': layerName,
@@ -199,7 +199,7 @@ function createPopUp(currentFeature) {
     close_button[0].style['margin-top'] = '0px';
     close_button[0].style['color'] = 'black';
 
-    close_button[0].style['background-image'] = "url(data:image/svg+xml;base64,PHN2ZyB4bWxuczpzdmc9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyMCAyMCIgdmVyc2lvbj0iMS4xIiBoZWlnaHQ9IjIwIiB3aWR0aD0iMjAiPg0KICA8cGF0aCBkPSJtNSA1IDAgMS41IDMuNSAzLjUtMy41IDMuNSAwIDEuNSAxLjUgMCAzLjUtMy41IDMuNSAzLjUgMS41IDAgMC0xLjUtMy41LTMuNSAzLjUtMy41IDAtMS41LTEuNSAwLTMuNSAzLjUtMy41LTMuNS0xLjUgMHoiIGZpbGw9IiMwMDAiLz4NCjwvc3ZnPg==)";
+    // close_button[0].style['background-image'] = "url(data:image/svg+xml;base64,PHN2ZyB4bWxuczpzdmc9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyMCAyMCIgdmVyc2lvbj0iMS4xIiBoZWlnaHQ9IjIwIiB3aWR0aD0iMjAiPg0KICA8cGF0aCBkPSJtNSA1IDAgMS41IDMuNSAzLjUtMy41IDMuNSAwIDEuNSAxLjUgMCAzLjUtMy41IDMuNSAzLjUgMS41IDAgMC0xLjUtMy41LTMuNSAzLjUtMy41IDAtMS41LTEuNSAwLTMuNSAzLjUtMy41LTMuNS0xLjUgMHoiIGZpbGw9IiMwMDAiLz4NCjwvc3ZnPg==)";
 
     popup.on('close', function (e) {
         let activeItem = document.getElementsByClassName('active');
@@ -221,13 +221,17 @@ function buildLocationList(data) {
         // Shorten data.feature.properties to just `prop` so we're not
         // writing this long form over and over again.
         let prop = currentFeature.properties;
-        console.log(prop);
+        // console.log(prop);
         // Select the listing container in the HTML and append a div
         // with the class 'item' for each store
         let listings = document.getElementById('listings');
         let listing = listings.appendChild(document.createElement('div'));
         listing.className = 'item';
         listing.id = 'listing-' + prop.id.slice(2);
+        // console.log(listing.id);
+        // if (prop.id.slice(2) === "42") {
+        //     console.log(prop);
+        // }
 
         // Create a new link with the class 'title' for each store
         // and fill it with the store address
@@ -245,7 +249,7 @@ function buildLocationList(data) {
         checkbox.className = 'ui checkbox';
         let input = checkbox.appendChild(document.createElement('input'));
         input.type = 'checkbox';
-        input.name = prop.id.slice(2);
+        input.name = prop.cluster;
         let label = checkbox.appendChild(document.createElement('label'));
         label.innerHTML = prop.capacity;
         if (prop.status) {
@@ -263,12 +267,7 @@ function buildLocationList(data) {
             if (activeItem[0]) {
                 activeItem[0].classList.remove('active');
             }
-
             this.parentNode.classList.add('active');
-
-
-
-
         });
     }
 

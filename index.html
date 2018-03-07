@@ -9,6 +9,8 @@
     <script src="node_modules/leaflet/dist/leaflet.js"></script>
     <script src="node_modules/lodash/lodash.min.js"></script>
     <script src='node_modules/@mapbox/leaflet-omnivore/leaflet-omnivore.min.js'></script>
+    <script src='node_modules/d3-color/build/d3-color.min.js'></script>
+    <script src='node_modules/d3-interpolate/build/d3-interpolate.min.js'></script>
 
     <link href='assets/css/popup.css' rel='stylesheet'/>
     <link href='assets/css/panel.css' rel='stylesheet'/>
@@ -40,8 +42,8 @@
     // let _layerName = '';
     // let _id;
     // let _pollutant;
+
     let isSlideOut = false;
-    //defining our object however we like
     let state = {
         is_play: false,
         isPollutantSelected: false,
@@ -58,11 +60,10 @@
         activeLayers: new Set()
     };
 
-    async function downloadSources(activeLayers) {
+    function downloadSources(activeLayers) {
         for (let layer of activeLayers) {
             if (!state.availableSources[state._pollutant].has(layer)) {
-                const result = await downloadSource(layer, state._pollutant, function () {
-                    console.log(state);
+                downloadSource(layer, state._pollutant, function () {
                 });
             }
         }
@@ -83,7 +84,6 @@
                     'fill-color': {"type": "identity", "property": "color"},
                     'fill-opacity': 0.5,
                     'fill-outline-color': "white"
-
                 }
             });
             state.existingLayers.add(state._pollutant + "_" + layer + "_layer");
@@ -105,15 +105,23 @@
             checkedLayer = _.filter(isLayerChecked, function (o) {
                 return o.checked;
             });
+            console.log(checkedLayer);
 
             let activeLayers = _.map(checkedLayer, 'name');
-            console.log(activeLayers);
             if (state._pollutant !== "") {
                 downloadSources(activeLayers);
-                showActiveLayers(activeLayers);
+                $('body').css('cursor', 'progress');
+                setTimeout(function(){
+                    showActiveLayers(activeLayers);
+                    $('body').css('cursor', 'default');
+                }, 3000);
             }
+        } else {
+            showActiveLayers([]);
         }
     });
+
+
 </script>
 
 <script>
@@ -126,7 +134,6 @@
             timer = setInterval(function () {
                 $("input[type='range']")[0].value = (state.month % 12).toString();
                 layerNames.forEach(function (o) {
-                    console.log("layerName = ", o);
                     filterBy(state.month % 12, o);
                 });
                 state.month += 1;
@@ -135,8 +142,30 @@
             $('#play_button').removeClass('fa fa-pause fa-lg').addClass('fa fa-play fa-lg');
             clearInterval(timer);
         }
-        console.log(timer);
         state.is_play = !state.is_play;
+    }
+    function sync() {
+        let isLayerChecked = $('div').find('input');
+        let checkedLayer;
+
+        if (isLayerChecked.is(':checked')) {
+            checkedLayer = _.filter(isLayerChecked, function (o) {
+                return o.checked;
+            });
+
+            let activeLayers = _.map(checkedLayer, 'name');
+            console.log(activeLayers);
+            if (state._pollutant !== "") {
+                downloadSources(activeLayers);
+                $('body').css('cursor', 'progress');
+                setTimeout(function(){
+                    showActiveLayers(activeLayers);
+                    $('body').css('cursor', 'default');
+                }, 3000);
+            }
+        } else {
+            showActiveLayers([]);
+        }
     }
 </script>
 
@@ -173,7 +202,7 @@
                 <i class="icon asterisk" id="pm25_button"></i>
                 PM2.5
             </button>
-            <button class="mini ui inverted blue icon toggle button" onclick="console.log('update');">
+            <button class="mini ui inverted blue icon toggle button" onclick="sync();">
                 <i class="sync alternate icon" id="update_button"></i>
                 更新
             </button>
@@ -201,7 +230,7 @@
     <!--<input id='slider' style="margin-left: 40px;" type='range' min='0' max='11' step='1' value='0'/>-->
 
 
-    <div class="cartodb-timeslider" style="width: 200px; bottom: 20px; left: 20px;">
+    <div class="cartodb-timeslider" style="width: 200px; top: 10px; right: 50px;">
         <ul>
             <li class="controls" style="cursor:pointer" onclick="play(state.existingLayers);">
                 <i class="fa fa-play fa-lg" style="margin-left: 20px; position: absolute; margin-top: 13px;"
@@ -232,9 +261,11 @@
         if (isSlideOut) {
             $('.mapboxgl-ctrl-top-right').css('transition-timing-function', 'linear').css('right', '300px');
             $('.mapbox-attribution-container').css('transition-timing-function', 'linear').css('right', '305px');
+            $('.cartodb-timeslider').css('transition-timing-function', 'linear').css('right', '350px');
         } else {
             $('.mapboxgl-ctrl-top-right').css('right', '0px');
             $('.mapbox-attribution-container').css('right', '5px');
+            $('.cartodb-timeslider').css('transition-timing-function', 'linear').css('right', '50px');
         }
     });
 
@@ -289,7 +320,8 @@
         center: [135.43366015639952, 38.37210580471424],
         zoom: 5,
         doubleClickZoom: false,
-        dragRotate: false
+        dragRotate: false,
+        touchZoomRotate: true
     });
 
     map.addControl(new mapboxgl.NavigationControl(), 'top-right');
@@ -317,20 +349,20 @@
     // Map interactions
     map.on('sourcedata', function (sourcedata) {
         if (sourcedata.isSourceLoaded) {
-            map.setMinZoom(5);
+            map.setMinZoom(4);
             map.setMaxZoom(16);
 
             map.on('mouseenter', 'points', function () {
-                console.log("mouseenter events detected!");
+                // console.log("mouseenter events detected!");
                 map.getCanvas().style.cursor = 'pointer';
             });
-            console.log("mouseenter events defined!");
+            // console.log("mouseenter events defined!");
             map.on('mouseleave', 'points', function () {
                 map.getCanvas().style.cursor = '';
             });
 
             map.on('click', function (e) {
-                console.log("You clicked the icon!");
+                // console.log("You clicked the icon!");
                 let features = map.queryRenderedFeatures(e.point, {layers: ['points']});
                 if (features.length) {
                     let clickedPoint = features[0];
@@ -395,7 +427,6 @@
             map.on("mousemove", "points", function (e) {
                 map.setFilter("points-hover", ["==", "name", e.features[0].properties.name]);
             });
-
             // Reset the state-fills-hover layer's filter when the mouse leaves the layer.
             map.on("mouseleave", "points", function () {
                 map.setFilter("points-hover", ["==", "name", ""]);
