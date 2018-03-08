@@ -9,7 +9,11 @@
     <script src="node_modules/leaflet/dist/leaflet.js"></script>
     <script src="node_modules/lodash/lodash.min.js"></script>
     <script src='node_modules/@mapbox/leaflet-omnivore/leaflet-omnivore.min.js'></script>
+
+    <script src='node_modules/d3/build/d3.min.js'></script>
     <script src='node_modules/d3-color/build/d3-color.min.js'></script>
+    <script src='node_modules/d3-svg-legend/d3-legend.min.js'></script>
+
     <script src='node_modules/d3-interpolate/build/d3-interpolate.min.js'></script>
 
     <link href='assets/css/popup.css' rel='stylesheet'/>
@@ -36,6 +40,9 @@
 </head>
 <body>
 
+
+
+
 <script>
     // let is_play = false;
     // let month = 0;
@@ -57,19 +64,22 @@
             "so2": new Set()
         },
         existingLayers: new Set(),
-        activeLayers: new Set()
+        activeLayers: new Set(),
+        max_concentration: 0
     };
 
-    function downloadSources(activeLayers) {
+    async function downloadSources(activeLayers) {
         for (let layer of activeLayers) {
             if (!state.availableSources[state._pollutant].has(layer)) {
-                downloadSource(layer, state._pollutant, function () {
-                });
+                await downloadSource(layer, state._pollutant, function () {});
             }
         }
+
     }
 
     function showActiveLayers(activeLayers) {
+
+        console.log('max_concentration = ', state.max_concentration);
         state.existingLayers.forEach(function (o) {
             map.removeLayer(o);
         });
@@ -93,6 +103,7 @@
                 filterBy(month, state._pollutant + "_" + layer + "_layer");
             });
         }
+        drawLegend(state.max_concentration);
     }
 
     //defining a 'watcher' for an attribute
@@ -100,7 +111,7 @@
         console.log("_pollutant changed: ", state._pollutant);
         let isLayerChecked = $('div').find('input');
         let checkedLayer;
-
+        state.max_concentration = 0;
         if (isLayerChecked.is(':checked')) {
             checkedLayer = _.filter(isLayerChecked, function (o) {
                 return o.checked;
@@ -114,14 +125,15 @@
                 setTimeout(function(){
                     showActiveLayers(activeLayers);
                     $('body').css('cursor', 'default');
+                    $(".cartodb-timeslider").show();
                 }, 3000);
             }
+
         } else {
             showActiveLayers([]);
+            $(".cartodb-timeslider").hide();
         }
     });
-
-
 </script>
 
 <script>
@@ -147,6 +159,7 @@
     function sync() {
         let isLayerChecked = $('div').find('input');
         let checkedLayer;
+        state.max_concentration = 0;
 
         if (isLayerChecked.is(':checked')) {
             checkedLayer = _.filter(isLayerChecked, function (o) {
@@ -161,16 +174,18 @@
                 setTimeout(function(){
                     showActiveLayers(activeLayers);
                     $('body').css('cursor', 'default');
+                    $(".cartodb-timeslider").show();
                 }, 3000);
             }
         } else {
             showActiveLayers([]);
+            $(".cartodb-timeslider").hide();
         }
     }
 </script>
 
 
-<nav id="menu">
+<nav id="menu" style="display:none;">
     <div class="header">
         <hr>
         <h3 class="apptitle">Coal site-by-site map</h3>
@@ -184,6 +199,7 @@
                 もっと詳しく知る
             </button>
             <hr>
+
         </div>
         <div id="picker">
             <h5>CHOOSE A POLLUTANT:</h5>
@@ -230,13 +246,12 @@
     <!--<input id='slider' style="margin-left: 40px;" type='range' min='0' max='11' step='1' value='0'/>-->
 
 
-    <div class="cartodb-timeslider" style="width: 200px; top: 10px; right: 50px;">
+    <div class="cartodb-timeslider" style="width: 200px; top: 10px; right: 50px; display:none;">
         <ul>
             <li class="controls" style="cursor:pointer" onclick="play(state.existingLayers);">
                 <i class="fa fa-play fa-lg" style="margin-left: 20px; position: absolute; margin-top: 13px;"
                    id="play_button"></i>
             </li>
-
             <li class="time"><p id="month" class="value"></p></li>
             <li class="last">
                 <input id='slider' style="margin-left: 15px;" type='range' min='0' max='11' step='1' value='0'/>
@@ -259,10 +274,12 @@
         slideout.toggle();
         isSlideOut = !isSlideOut;
         if (isSlideOut) {
+            $('#menu').show();
             $('.mapboxgl-ctrl-top-right').css('transition-timing-function', 'linear').css('right', '300px');
             $('.mapbox-attribution-container').css('transition-timing-function', 'linear').css('right', '305px');
             $('.cartodb-timeslider').css('transition-timing-function', 'linear').css('right', '350px');
         } else {
+            // $('#menu').hide();
             $('.mapboxgl-ctrl-top-right').css('right', '0px');
             $('.mapbox-attribution-container').css('right', '5px');
             $('.cartodb-timeslider').css('transition-timing-function', 'linear').css('right', '50px');
@@ -349,7 +366,7 @@
     // Map interactions
     map.on('sourcedata', function (sourcedata) {
         if (sourcedata.isSourceLoaded) {
-            map.setMinZoom(4);
+            map.setMinZoom(3);
             map.setMaxZoom(16);
 
             map.on('mouseenter', 'points', function () {
@@ -437,7 +454,36 @@
 
 </script>
 <!--<script src="assets/js/sidebar_handler.js"></script>-->
+<script>
+    function drawLegend(max) {
+        d3.selectAll('svg').remove();
+        d3.select('#panel').append('svg');
 
+
+        let sequentialScale = d3.scaleSequential(d3.interpolateLab("#ec7014", "#662506"))
+          .domain([0,max]);
+
+        let svg = d3.select("svg")
+            .style("background", "white")
+            .style("opacity", 0.9)
+            .style("border-radius", "25px")
+            .style("border", "2px solid #73AD21");
+
+        svg.append("g")
+          .attr("class", "legendSequential")
+          .attr("transform", "translate(20,20)");
+
+        let legendSequential = d3.legendColor()
+            .shapeWidth(30)
+            .cells(4)
+            .orient("vertical")
+            .scale(sequentialScale)
+            .title("濃度 (ppm)");
+
+        svg.select(".legendSequential")
+          .call(legendSequential);
+    }
+</script>
 
 <link href="node_modules/font-awesome/css/font-awesome.min.css" rel="stylesheet">
 </body>

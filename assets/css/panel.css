@@ -65,3 +65,12 @@ body {
     color: white;
     font-weight: bold;
 }
+
+#panel svg {
+    position: absolute;
+    top: 1%;
+    left: 2.5%;
+    z-index: 1000;
+    width: 95px;
+    height: 115px;
+}

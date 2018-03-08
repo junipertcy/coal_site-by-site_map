@@ -11,6 +11,8 @@ function hightlightCoalPlant(){
 
 
 function downloadSource(id, pollutant, cb) {
+
+
     omnivore.kml('dataset/japan' + id + '_' + pollutant + '_concentration_monthly.kml').on('ready', function (d) {
         let sourceName = pollutant + '_' + id;
         let layerName = sourceName + "_layer";
@@ -48,15 +50,19 @@ function downloadSource(id, pollutant, cb) {
                 d.properties.month = 12;  // always present
             }
             try {
-                let color = d3.interpolateLab("#ffffb2", "#b10026");
+                let color = d3.interpolateLab("#ec7014", "#662506");
                 // console.log('d.properties.name =', d.properties.name);
                 d.properties.color = color(parseFloat(d.properties.name.split(" - ")[0]));
+                if (parseFloat(d.properties.name.split(" - ")) > state.max_concentration) {
+                    state.max_concentration = parseFloat(d.properties.name.split(" - "));
+                }
             } catch (e) {
                 console.log(d);
             }
 
             return d;
         });
+
         console.log("[INFO] sourceName = ", sourceName, " Downloaded!");
         map.addSource(sourceName, {
             'type': 'geojson',
@@ -73,78 +79,6 @@ function downloadSource(id, pollutant, cb) {
 
 function createPopUp(currentFeature) {
     let id = currentFeature.properties.id.slice(2);
-    // console.log("hey ID = ", id);
-    // downloadSource(id, state._pollutant, function(sourceName, layerName) {
-    //     // map.addLayer({
-    //     //     'id': layerName,
-    //     //     'type': 'fill',
-    //     //     "interactive": true,
-    //     //     'source': sourceName,
-    //     //     'paint': {
-    //     //         'fill-color': {"type": "identity", "property": "color"},
-    //     //         'fill-opacity': 0.5,
-    //     //         'fill-outline-color': "white"
-    //     //
-    //     //     }
-    //     // });
-    //     //
-    //     // filterBy(0, layerName);  // January
-    //     //
-    //     // document.getElementById('slider').addEventListener('input', function (e) {
-    //     //     let month = parseInt(e.target.value);
-    //     //     filterBy(month, layerName);
-    //     // });
-    //
-    //     let colors = [];
-    //     for (let i = 0; i < pre_data.length; i++) {
-    //         let layer = pre_data[i].properties.name;
-    //         let color;
-    //
-    //         let item = document.createElement('div');
-    //         let key = document.createElement('div');
-    //         let value = document.createElement('span');
-    //
-    //         if (colors.length === 3) {
-    //             continue;
-    //         }
-    //         if (layer === "0.05 - 0.1") {
-    //             if (_.indexOf(colors, "#5990e2") === -1) {
-    //                 color = "#5990e2";
-    //                 value.style.bottom = '35px';
-    //             } else {
-    //                 continue;
-    //             }
-    //         } else if (layer === "0.1 - 0.2") {
-    //             if (_.indexOf(colors, "#FCA107") === -1) {
-    //                 color = "#FCA107";
-    //                 value.style.bottom = '20px';
-    //             } else {
-    //                 continue;
-    //             }
-    //         } else if (layer === "0.2 - 0.3") {
-    //             if (_.indexOf(colors, "#7f3121") === -1) {
-    //                 color = "#7f3121";
-    //                 value.style.bottom = '5px';
-    //             } else {
-    //                 continue;
-    //             }
-    //         }
-    //
-    //         key.className = 'bar';
-    //         key.style.background = color;
-    //
-    //         value.style.position = "absolute";
-    //         value.style.marginLeft = "10px";
-    //         value.style.color = 'white';
-    //
-    //         value.innerHTML = layer;
-    //         item.appendChild(key);
-    //         item.appendChild(value);
-    //         legend.appendChild(item);
-    //         colors.push(color);
-    //     }
-    // });
-
     let popUps = document.getElementsByClassName('mapboxgl-popup');
     // Check if there is already a popup on the map and if so, remove it
     if (popUps[0]) popUps[0].remove();
