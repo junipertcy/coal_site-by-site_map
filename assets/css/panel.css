@@ -14,17 +14,28 @@ body {
 #panel .toggle-button {
     position: absolute;
     top: 1%;
-    left: 0.5%;
+    left: 10px;
     z-index: 1000;
+    width: 30px;
+    height: 30px;
+    border-radius: 5px;
+    font-size: 14px;
+    font-weight: bold;
 }
 
 
 .mapbox-attribution-container {
     z-index: 1000;
     bottom: 0;
-    right: 5px;
+    right: 0px;
+    width: 190px;
     position: absolute;
     display: block;
+    background-color: darkgreen;
+    opacity: 0.6;
+    text-align: right;
+    padding: 0px 10px;
+
 }
 
 .mapboxgl-ctrl-compass {
@@ -69,8 +80,22 @@ body {
 #panel svg {
     position: absolute;
     top: 1%;
-    left: 2.5%;
+    left: 50px;
     z-index: 1000;
     width: 95px;
     height: 115px;
+}
+
+#panel #bottomRight {
+    position: absolute;
+    right: 0;
+    bottom: 24px;
+    padding: 10px 10px 5px;
+    width: 190px;
+    z-index: 100;
+    font-size: 12px;
+    border-bottom: 1px solid transparent;
+    background-color: darkgreen;
+    opacity: 0.6;
+    text-align: right;
 }

@@ -37,10 +37,11 @@
     <link href='assets/js/semantic/dist/semantic.min.css' rel='stylesheet'>
     <link href='assets/css/slider.css' rel='stylesheet'>
     <link href='assets/css/cartodb.css' rel='stylesheet'>
+    <link href="assets/css/splashOverlay.css" rel="stylesheet">
+    <link href="node_modules/font-awesome/css/font-awesome.min.css" rel="stylesheet">
+
 </head>
 <body>
-
-
 
 
 <script>
@@ -71,7 +72,8 @@
     async function downloadSources(activeLayers) {
         for (let layer of activeLayers) {
             if (!state.availableSources[state._pollutant].has(layer)) {
-                await downloadSource(layer, state._pollutant, function () {});
+                await downloadSource(layer, state._pollutant, function () {
+                });
             }
         }
 
@@ -122,7 +124,7 @@
             if (state._pollutant !== "") {
                 downloadSources(activeLayers);
                 $('body').css('cursor', 'progress');
-                setTimeout(function(){
+                setTimeout(function () {
                     showActiveLayers(activeLayers);
                     $('body').css('cursor', 'default');
                     $(".cartodb-timeslider").show();
@@ -132,6 +134,7 @@
         } else {
             showActiveLayers([]);
             $(".cartodb-timeslider").hide();
+            d3.selectAll('svg').remove();
         }
     });
 </script>
@@ -156,6 +159,7 @@
         }
         state.is_play = !state.is_play;
     }
+
     function sync() {
         let isLayerChecked = $('div').find('input');
         let checkedLayer;
@@ -171,7 +175,7 @@
             if (state._pollutant !== "") {
                 downloadSources(activeLayers);
                 $('body').css('cursor', 'progress');
-                setTimeout(function(){
+                setTimeout(function () {
                     showActiveLayers(activeLayers);
                     $('body').css('cursor', 'default');
                     $(".cartodb-timeslider").show();
@@ -180,6 +184,7 @@
         } else {
             showActiveLayers([]);
             $(".cartodb-timeslider").hide();
+            d3.selectAll('svg').remove();
         }
     }
 </script>
@@ -229,12 +234,17 @@
 </nav>
 
 <main id="panel">
-    <button class="toggle-button">☰</button>
+    <button class="toggle-button" id="slider-button">☰</button>
+    <div id="bottomRight">
+        <div><a href="" target="_blank" style="color: ghostwhite; font-weight: bold;">Greenpeace Japan</a></div>
+        <div style="color: ghostwhite;">Source: TO_BE_FILLED</div>
+    </div>
     <div class="mapbox-attribution-container">
-        <a href="https://www.mapbox.com/about/maps/">© Mapbox | </a>
-        <a href="https://www.openstreetmap.org/copyright">© OpenStreetMap</a>
+        <a href="https://www.mapbox.com/about/maps/" style="color: ghostwhite;">© Mapbox | </a>
+        <a href="https://www.openstreetmap.org/copyright" style="color: ghostwhite;">© OpenStreetMap</a>
         <!--<a href="" target="_blank"><strong>Improve this map</strong></a>-->
     </div>
+
     <!--<div id='legend' class='legend'>-->
     <!--<div style="font-weight: bold; color: white;">濃度 (ppm)</div>-->
     <!--</div>-->
@@ -244,7 +254,6 @@
     <!--<label id='month' style="color: white;"></label>-->
     <!--</div>-->
     <!--<input id='slider' style="margin-left: 40px;" type='range' min='0' max='11' step='1' value='0'/>-->
-
 
     <div class="cartodb-timeslider" style="width: 200px; top: 10px; right: 50px; display:none;">
         <ul>
@@ -275,18 +284,53 @@
         isSlideOut = !isSlideOut;
         if (isSlideOut) {
             $('#menu').show();
-            $('.mapboxgl-ctrl-top-right').css('transition-timing-function', 'linear').css('right', '300px');
-            $('.mapbox-attribution-container').css('transition-timing-function', 'linear').css('right', '305px');
-            $('.cartodb-timeslider').css('transition-timing-function', 'linear').css('right', '350px');
+            // $('.mapboxgl-ctrl-top-right').css('transition-timing-function', 'linear').css('right', '300px');
+            // $('.mapbox-attribution-container').css('transition-timing-function', 'linear').css('right', '300px');
+            // $('.cartodb-timeslider').css('transition-timing-function', 'linear').css('right', '350px');
+            // $('#bottomRight').css('transition-timing-function', 'linear').css('right', '300px');
+            $('#panel').css('transition-timing-function', 'linear').css('right', '300px');
+            $('#slider-button').css('transition-timing-function', 'linear').css('left', '310px');
+            $('.mapboxgl-ctrl-bottom-left').css('left', '300px');
+            $('.mapboxgl-popup-content').css('left', '310px');
+            d3.select('svg').style('left', '350px');
         } else {
             // $('#menu').hide();
-            $('.mapboxgl-ctrl-top-right').css('right', '0px');
-            $('.mapbox-attribution-container').css('right', '5px');
-            $('.cartodb-timeslider').css('transition-timing-function', 'linear').css('right', '50px');
+            // $('.mapboxgl-ctrl-top-right').css('right', '0px');
+            // $('.mapbox-attribution-container').css('right', '0px');
+            // $('.cartodb-timeslider').css('transition-timing-function', 'linear').css('right', '50px');
+            // $('#bottomRight').css('transition-timing-function', 'linear').css('right', '0px');
+            $('#panel').css('transition-timing-function', 'linear').css('right', '0');
+            $('#slider-button').css('transition-timing-function', 'linear').css('left', '10px');
+            $('.mapboxgl-ctrl-bottom-left').css('left', '0px');
+            $('.mapboxgl-popup-content').css('left', '10px');
+            d3.select('svg').style('left', '50px');
         }
     });
 
 </script>
+
+<!--<div id="propertyInfoSection" class="bottomLeftSection" style="display: block; position:absolute;">-->
+        <!--<table>-->
+            <!--<tbody>-->
+            <!--<tr>-->
+                <!--<td>Address</td>-->
+                <!--<td>-->
+                    <!--<div id="selectedPropertyAddress">801 W 22ND AV</div>-->
+                    <!--<a href="https://www.google.com/maps/place/801 W 22ND AV, Vancouver, BC/data=!3m1!1e3"-->
+                       <!--id="selectedPropertyMapsLink" class="button lineForGoogleMaps" target="_blank"-->
+                       <!--style="display: inline-block;">On Google Maps</a><label for="chkShowTutorial3DOverlay">-->
+                    <!--<div class="buttonForTutorial3d lineForGoogleMaps" style="display: inline-block;">See in 3D <i-->
+                            <!--class="fa fa-question-circle-o fa-fw" aria-hidden="true"></i></div>-->
+                <!--</label></td>-->
+            <!--</tr>-->
+            <!--<tr>-->
+                <!--<td>Assessment</td>-->
+                <!--<td id="selectedPropertyAssessment">$87,780,900</td>-->
+            <!--</tr>-->
+            <!--</tbody>-->
+        <!--</table>-->
+<!--</div>-->
+
 
 <script>
     function selectPollutant(pollutant) {
@@ -403,7 +447,6 @@
         }
     });
 
-
     map.loadImage('assets/css/img/factoryTransp3.png', function (error, image) {
         if (error) throw error;
         map.addImage('industry', image);
@@ -458,10 +501,8 @@
     function drawLegend(max) {
         d3.selectAll('svg').remove();
         d3.select('#panel').append('svg');
-
-
         let sequentialScale = d3.scaleSequential(d3.interpolateLab("#ec7014", "#662506"))
-          .domain([0,max]);
+            .domain([0, max]);
 
         let svg = d3.select("svg")
             .style("background", "white")
@@ -470,8 +511,8 @@
             .style("border", "2px solid #73AD21");
 
         svg.append("g")
-          .attr("class", "legendSequential")
-          .attr("transform", "translate(20,20)");
+            .attr("class", "legendSequential")
+            .attr("transform", "translate(20,20)");
 
         let legendSequential = d3.legendColor()
             .shapeWidth(30)
@@ -481,10 +522,98 @@
             .title("濃度 (ppm)");
 
         svg.select(".legendSequential")
-          .call(legendSequential);
+            .call(legendSequential);
+        svg.style('left', '350px');
     }
 </script>
 
-<link href="node_modules/font-awesome/css/font-awesome.min.css" rel="stylesheet">
+
+<!--<div id="splashOverlay" class="fullScreenOverlay">-->
+<!--<div id="splashFloat" style="visibility: visible; opacity: 1;">-->
+<!--<div id="regionSelectorFloat" style="display: none;"><h1>Select a City to View Assessments</h1> <a-->
+<!--href="http://yvr-assess.dha.io/">-->
+<!--<div class="regionSelection"><h2>Vancouver</h2><img src="assets/images/regions/yvr-region-160x160.jpg">-->
+<!--<div>Ranked 3rd Least Affordable Housing Market in the World</div>-->
+<!--</div>-->
+<!--</a><a href="http://sfo-assess.dha.io/">-->
+<!--<div class="regionSelection"><h2>San Francisco</h2><img src="assets/images/regions/sfo-region-160x160.jpg">-->
+<!--<div>Ranked 9th Least Affordable Housing Market in the World</div>-->
+<!--</div>-->
+<!--</a><a href="http://yeg-assess.dha.io/">-->
+<!--<div class="regionSelection isLast"><h2>Edmonton</h2><img-->
+<!--src="assets/images/regions/yeg-region-160x160.jpg">-->
+<!--<div>Median Residential Assessment of $322,000 CAD ($239,450 USD)</div>-->
+<!--</div>-->
+<!--</a></div> &lt;!&ndash; <video controls autoplay>-->
+<!--<source src="assets/videos/3d_mode_instructions_canada_place.webm" type="video/webm">-->
+<!--Your browser does not support the video tag.-->
+<!--</video> &ndash;&gt;-->
+<!--<div id="regionSplashScreen">-->
+<!--<h1>A Look at Property Assessments in <label for="chkShowCitiesDropdown"><span-->
+<!--class="region">Edmonton</span><i class="fa fa-caret-down fa-fw"></i></label>-->
+<!--<div class="regionsDropdown"><a href="http://yvr-assess.dha.io/">-->
+<!--<div class="regionOption">-->
+<!--<div>Vancouver</div>-->
+<!--<div class="shortLine">Ranked 3rd Least Affordable Housing Market in the World</div>-->
+<!--</div>-->
+<!--</a><a href="http://sfo-assess.dha.io/">-->
+<!--<div class="regionOption isLast">-->
+<!--<div>San Francisco</div>-->
+<!--<div class="shortLine">Ranked 9th Least Affordable Housing Market in the World</div>-->
+<!--</div>-->
+<!--</a></div>-->
+<!--</h1>-->
+<!--<p class="regionIntroParagraph">Where can I afford to buy a house? Compared to my neighbours, am I paying-->
+<!--more property tax? Are there patterns that dramatically affect a house's assessment value?</p>-->
+<!--<p>This interactive map helps you answer these questions. Get started with some stories, or skip them to-->
+<!--zoom in and click on a property.</p>-->
+<!--<div class="buttonSection isOutdated" style="display: none;">-->
+<!--<div class="button error"><i class="fa fa-exclamation-triangle fa-fw" aria-hidden="true"></i>-->
+<!--Incompatible with your Browser-->
+<!--</div>-->
+<!--<div class="buttonMessage">* This visualization needs hardware acceleration that your browser doesn't-->
+<!--support. Please upgrade your browser, or view this with Chrome/Firefox on your computer.-->
+<!--</div>-->
+<!--</div>-->
+<!--<div class="buttonSection isIE" style="display: none;">-->
+<!--<div class="button error"><i class="fa fa-exclamation-triangle fa-fw" aria-hidden="true"></i>-->
+<!--Incompatible with IE or Edge-->
+<!--</div>-->
+<!--<div class="buttonMessage">* This visualization runs <i>much slower</i> on IE/Edge, but works great with-->
+<!--Chrome or Firefox. Please use one of those browsers.-->
+<!--</div>-->
+<!--</div>-->
+<!--<div class="buttonSection noWebGL" style="display: none;">-->
+<!--<div class="button error"><i class="fa fa-exclamation-triangle fa-fw" aria-hidden="true"></i> Browser-->
+<!--Does Not Support WebGL-->
+<!--</div>-->
+<!--<div class="buttonMessage">* This visualization needs hardware acceleration that your browser doesn't-->
+<!--support. Please make sure your browser supports, and has "WebGL" turned on.-->
+<!--</div>-->
+<!--</div>-->
+<!--&lt;!&ndash; <div class='button caution'><i class="fa fa-exclamation-circle fa-fw" aria-hidden="true"></i> Performance better on a computer</div> &ndash;&gt;-->
+<!--<div class="buttonSection isMobileOrTablet" style="display: none;"><label for="chkSplashShowStories">-->
+<!--<div class="button caution splash showStories"><i class="fa fa-exclamation-circle fa-fw"-->
+<!--aria-hidden="true"></i> Try visualization on this-->
+<!--device (might be slow or not work)-->
+<!--</div>-->
+<!--</label>-->
+<!--<div class="buttonMessage">* This visualization will work on your device if it's newer. If it's too-->
+<!--slow, please try it on a computer! It's a map visualization, which would look better on a bigger-->
+<!--screen anyhow, and 3D buildings will show up there too.-->
+<!--</div>-->
+<!--</div>-->
+<!--<div class="buttonSection isDefault" style="display: block;"><label for="chkSplashShowStories">-->
+<!--<div class="button splash showStories">Stories in the Data</div>-->
+<!--</label> <span>or</span> <label for="chkSplashSkipStories">-->
+<!--<div class="button splash skipStories">Skip Stories</div>-->
+<!--</label></div>-->
+<!--<p class="note">NOTE: Property assessments are not what houses sell for. They can, however, offer clues on-->
+<!--where affordable housing can be found. Assessments are based on many factors, not just location. Does a-->
+<!--house have a garage? A furnished basement? Air conditioning? How old is it? </p></div>-->
+<!--</div>-->
+<!--</div>-->
+
+
 </body>
 </html>

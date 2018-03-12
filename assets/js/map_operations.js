@@ -1,6 +1,6 @@
 function flyToStore(currentFeature) {
     map.flyTo({
-        // center: currentFeature.geometry.coordinates,
+        center: currentFeature.geometry.coordinates,
         // zoom: 8
     });
 }
@@ -11,8 +11,6 @@ function hightlightCoalPlant(){
 
 
 function downloadSource(id, pollutant, cb) {
-
-
     omnivore.kml('dataset/japan' + id + '_' + pollutant + '_concentration_monthly.kml').on('ready', function (d) {
         let sourceName = pollutant + '_' + id;
         let layerName = sourceName + "_layer";
@@ -80,26 +78,20 @@ function downloadSource(id, pollutant, cb) {
 function createPopUp(currentFeature) {
     let id = currentFeature.properties.id.slice(2);
     let popUps = document.getElementsByClassName('mapboxgl-popup');
-    // Check if there is already a popup on the map and if so, remove it
-    if (popUps[0]) popUps[0].remove();
 
+    // Check if there is already a popup on the map and if so, remove it
+    if (popUps[0]) {
+        popUps[0].remove();
+    }
     let popup = new mapboxgl.Popup({closeOnClick: true, closeButton: true})
         .setLngLat(currentFeature.geometry.coordinates)
         .setHTML(
-            // '<h4>' + currentFeature.properties.name + '</h4>' +
-            // '<div>' +
-            //     '状況: ' + currentFeature.properties.status + '<br>' +
-            //     '設備容量（最大発電能力）: ' + currentFeature.properties.capacity + '<br>' +
-            //     '企業名／運営会社: ' + currentFeature.properties.operator + '<br>' +
-            //     '親会社／出資者等: ' + currentFeature.properties.investors + '<br>' +
-            //     '燃料: ' + currentFeature.properties.fuels_used + '<br>' +
-            // '</div>'
-
+            '<div style="text-align: center;">'+
+            '<div style="text-align: center; color: #444"><h2>' + currentFeature.properties.name + '</h2></div>' +
+            '<i class="fa fa-child fa-lg" style="text-align: left;">  影響を受ける学校: 130</i>' +
+            '<br>'+
+            '<br>'+
             '<table>' +
-            '  <thead>' +
-            '    <tr>' +
-            '      <th colspan="2">' + currentFeature.properties.name + '</th>' +
-            '    </tr>' +
             '  </thead>' +
             '  <tbody>' +
             '    <tr>' +
@@ -107,7 +99,7 @@ function createPopUp(currentFeature) {
             '      <td>' + currentFeature.properties.status + '</td>' +
             '    </tr>' +
             '    <tr>' +
-            '      <td>設備容量（最大発電能力）</td>' +
+            '      <td>最大発電能力</td>' +
             '      <td>' + currentFeature.properties.capacity + '</td>' +
             '    </tr>' +
             '    <tr>' +
@@ -123,9 +115,15 @@ function createPopUp(currentFeature) {
             '      <td>' + currentFeature.properties.fuels_used + '</td>' +
             '    </tr>' +
             '  </tbody>' +
-            '</table>'
+            '</table>' +
+            '</div>'
         )
         .addTo(map);
+    if (isSlideOut) {
+        d3.select('.mapboxgl-popup-content').style('left', '310px');
+    } else {
+        d3.select('.mapboxgl-popup-content').style('left', '10px');
+    }
 
     let close_button = document.getElementsByClassName('mapboxgl-popup-close-button');
     // close_button[0].className = "className"
@@ -133,14 +131,12 @@ function createPopUp(currentFeature) {
     close_button[0].style['margin-top'] = '0px';
     close_button[0].style['color'] = 'black';
 
-    // close_button[0].style['background-image'] = "url(data:image/svg+xml;base64,PHN2ZyB4bWxuczpzdmc9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyMCAyMCIgdmVyc2lvbj0iMS4xIiBoZWlnaHQ9IjIwIiB3aWR0aD0iMjAiPg0KICA8cGF0aCBkPSJtNSA1IDAgMS41IDMuNSAzLjUtMy41IDMuNSAwIDEuNSAxLjUgMCAzLjUtMy41IDMuNSAzLjUgMS41IDAgMC0xLjUtMy41LTMuNSAzLjUtMy41IDAtMS41LTEuNSAwLTMuNSAzLjUtMy41LTMuNS0xLjUgMHoiIGZpbGw9IiMwMDAiLz4NCjwvc3ZnPg==)";
-
     popup.on('close', function (e) {
         let activeItem = document.getElementsByClassName('active');
         if (activeItem[0]) {
             activeItem[0].classList.remove('active');
             map.flyTo({
-                // center: [142.61871875040669, 38.13053360748921],
+                // center: currentFeature.geometry.coordinates,
                 // zoom: 5
             })
         }

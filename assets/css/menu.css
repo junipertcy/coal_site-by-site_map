@@ -153,9 +153,10 @@ p.hint {
 
 /* Hand-written */
 #menu {
-    padding: 10px;
+padding: 10px;
     background: dimgray;
-    width: 100%;
+    width: 300px;
+    z-index: 1000;
 }
 
 #menu .header {
