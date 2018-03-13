@@ -30,6 +30,7 @@
     bottom: 95px;
     padding: 10px 10px 5px;
     width: 320px;
+    height: 190px;
     z-index: 100;
     font-size: 13px;
     border-bottom: 1px solid transparent;
@@ -71,4 +72,36 @@
     color: #111111;
     text-align: left;
     padding: 0em 0.5em;
+}
+
+/* Title containers */
+
+.title {
+    position: absolute;
+    right: 10px;
+    width: 320px;
+    bottom: 320px;
+    z-index: 10000;
+    background: white;
+    padding: 10px;
+    border-radius: 5px;
+    display: block;
+}
+
+.title .titleHideButton {
+    margin-top: -19px;
+    margin-left: 285px;
+}
+
+.instruction {
+    position: absolute;
+    z-index: 10001;
+    font-size: 10pt;
+    right: 10px;
+    bottom: 295px;
+    background: white;
+    padding: 5px 5px 10px 10px;
+    border-radius: 5px;
+    width: 320px;
+    display: block;
 }

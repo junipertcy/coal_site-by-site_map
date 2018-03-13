@@ -35,15 +35,16 @@
     <link href='assets/css/cartodb.css' rel='stylesheet'>
     <link href="assets/css/splashOverlay.css" rel="stylesheet">
     <link href='assets/css/popup.css' rel='stylesheet'/>
-    <link href='assets/css/panel.css' rel='stylesheet'/>
+    <link href='assets/css/mapControls.css' rel='stylesheet'/>
     <link href='assets/css/icons.css' rel='stylesheet'/>
-    <link href='assets/css/menu.css' rel='stylesheet'/>
 
 </head>
 <body>
 
 <script src="assets/js/higherInteraction.js"></script>
 <script src="assets/js/playAndSync.js"></script>
+<script src="assets/js/selectPollutant.js"></script>
+<script src='assets/js/drawLegend.js'></script>
 
 <div style="width: 270px;
     position: absolute;
@@ -76,26 +77,7 @@
     </button>
 </div>
 
-<nav id="menu" style="display:none;">
-    <div class="header">
-        <hr>
-        <h3 class="apptitle">Coal site-by-site map</h3>
-        <div id="helpbar">
-            <button class="ui mini right labeled icon violet button" style="width: 120px;"><i class="icon info"></i>
-                これは何ですか？
-            </button>
-            <button class="ui mini right labeled icon violet button" style="width: 120px;"><i
-                    class="icon right arrow"></i>
-                もっと詳しく知る
-            </button>
-        </div>
-
-    </div>
-    <div id='listings' class='listings'></div>
-    <div class='logo'></div>
-</nav>
-
-<main id="panel">
+<main id="mapControls">
     <div id="bottomRight">
         <div><a href="http://www.greenpeace.org/japan/ja/" target="_blank"
                 style="color: ghostwhite; font-weight: bold;">Greenpeace Japan</a></div>
@@ -120,64 +102,28 @@
     </div>
 </main>
 
-<div class="coal_plant_title_container" style="
-    position: absolute;
-    right: 10px;
-    bottom: 350px;
-    z-index: 10000;
-    background: white;
-    padding: 10px;
-    border-radius: 5px;
-    width: 320px;
-    display: block;">
-    Hover to a coal plant.
+<div class="title">
+    <div id="title_content">Hover to a coal plant.</div>
+    <div class="titleHideButton">
+        <i class="fa fa-minus-square"></i>
+    </div>
+</div>
+<div class="instruction">
+    <i class="fa fa-angle-double-right" id="instruction_content"> Click for more info.</i>
 
 </div>
-<div class="coal_plant_title_container_1" style="
-    position: absolute;
-    z-index: 10001;
-    font-size: 10pt;
-    right: 10px;
-    bottom: 327px;
-    background: white;
-    padding: 5px 5px 10px 10px;
-    border-radius: 5px;
-    width: 320px;
-    display: block;">
-    <i class="fa fa-angle-double-right"><span>  Click for more info.</span></i>
-    <i class="fa fa-minus-square"><span>  Hide</span></i>
-</div>
+
+
 <script>
     let slideout = new Slideout({
-        'panel': document.getElementById('panel'),
-        'menu': document.getElementById('menu'),
+        'panel': document.getElementById('mapControls'),
+        'menu': document.getElementById(''),
         'padding': 300,
         'tolerance': 70,
         'touch': false
     });
-    // // Toggle button
-    // document.querySelector('.toggle-button').addEventListener('click', function () {
-    //     slideout.toggle();
-    //     isSlideOut = !isSlideOut;
-    //     if (isSlideOut) {
-    //         $('#menu').show();
-    //         $('#panel').css('transition-timing-function', 'linear').css('right', '300px');
-    //         $('#slider-button').css('transition-timing-function', 'linear').css('left', '310px');
-    //         $('.mapboxgl-ctrl-bottom-left').css('left', '300px');
-    //         $('.mapboxgl-popup-content').css('left', '310px');
-    //         d3.select('svg').style('left', '350px');
-    //     } else {
-    //         $('#panel').css('transition-timing-function', 'linear').css('right', '0');
-    //         $('#slider-button').css('transition-timing-function', 'linear').css('left', '10px');
-    //         $('.mapboxgl-ctrl-bottom-left').css('left', '0px');
-    //         $('.mapboxgl-popup-content').css('left', '10px');
-    //         d3.select('svg').style('left', '50px');
-    //     }
-    // });
-</script>
 
-<script src="assets/js/selectPollutant.js"></script>
-<script src='assets/js/drawLegend.js'></script>
+</script>
 
 <script>
     let months = [
@@ -204,7 +150,7 @@
     mapboxgl.accessToken = 'pk.eyJ1IjoianVuaXBlcnRjeSIsImEiOiJvOFg5WFVjIn0.7NDB1oOLpq3A5qO7vLaQSA';
 
     let map = new mapboxgl.Map({
-        container: 'panel',
+        container: 'mapControls',
         style: style,
         center: [135.43366015639952, 38.37210580471424],
         zoom: 5,
@@ -283,31 +229,37 @@
                             });
 
                             // Add other map event listeners here:
-                            map.on('mouseenter', 'points', function () {
-
-
-                            });
                             map.on("mousemove", "points", function (e) {
                                 map.getCanvas().style.cursor = 'pointer';
                                 // map.setFilter("points-hover", ["==", "name", e.features[0].properties.name]);
-                                d3.select('.coal_plant_title_container').style('display', "block").text(e.features[0].properties.name);
-                                d3.select('.coal_plant_title_container_1').style('display', "block");
-
+                                d3.select('.title').style('display', 'block');
+                                d3.select('.instruction').style('display', 'block');
+                                if (state.activeListings.length === 0) {
+                                    d3.select('.title').select('#title_content').style('display', "block").text(e.features[0].properties.name);
+                                    d3.select('.instruction').select('#instruction_content').style('display', "block").text(' Click for more info.');
+                                } else {
+                                    d3.select('.title').select('#title_content').style('display', "block").text('Select a new coal plant.');
+                                    d3.select('.instruction').select('#instruction_content').style('display', "block").text(' Click to update the info window.');
+                                }
 
                             });
                             map.on("mouseleave", "points", function (e) {
                                 map.getCanvas().style.cursor = '';
-
-                                d3.select('.coal_plant_title_container').style('display', "none");
-                                d3.select('.coal_plant_title_container_1').style('display', "none");
+                                if (state.activeListings.length === 0) {
+                                    // d3.select('.title').style('display', "none");
+                                    // d3.select('.instruction').style('display', "none");
+                                }
                             });
 
                             map.on('click', function (e) {
+                                // Rule 1: At any time, there is one and only one activeListings.
                                 let features = map.queryRenderedFeatures(e.point, {layers: ['points']});
 
                                 state.activeListings.pop();
 
                                 if (features.length) {
+                                    d3.select('.title').select('#title_content').style('display', "block").text(features[0].properties.name);
+                                    d3.select('.instruction').select('#instruction_content').style('display', "block").text('  double click for the pollution layers');
                                     state.activeListings.push(features[0].properties.name);
                                     let clickedPoint = features[0];
                                     flyToStore(clickedPoint);
@@ -315,6 +267,7 @@
                                 } else {
                                     console.log('clicked map, but not on a icon.');
                                 }
+
                                 if (state.activeListings.length === 0) {
                                     map.setFilter("points-hover", ["==", "name", ""]);
                                 } else {
@@ -323,16 +276,42 @@
                             });
                             map.on('dblclick', function (e) {
                                 let features = map.queryRenderedFeatures(e.point, {layers: ['points']});
-                                map.setFilter("points-dblclick", ["==", "name", features[0].properties.name]);
+                                // map.setFilter("points-dblclick", ["==", "name", features[0].properties.name]);
                                 d3.select('#picker').style('display', 'block');
-                                features.forEach(function(f){
-                                    state.activeClusterIds.add(f.properties.cluster)
+                                d3.select('.cartodb-timeslider').style('display', 'none');
+                                features.forEach(function(f) {
+                                    console.log(f.properties);
+                                    if (state.activePlantIds.has(f.properties.id.slice(2))) {
+                                        state.activeClusterIds.delete(f.properties.cluster);
+                                        state.activePlantIds.delete(f.properties.id.slice(2));
+                                        let index = 0;
+                                        state.activeNames.forEach(function(name){
+                                            console.log('===== in the forEach =====');
+                                            console.log('name is', name);
+                                            console.log('f.properties.name is', f.properties.name);
+                                            if (name === f.properties.name) {
+                                                delete state.activeNames[index];
+                                            }
+                                            // state.activeNames.shift();
+                                            state.activeNames = Array.from(new Set(state.activeNames));
+                                            index += 1;
+                                        });
+                                    } else {
+                                        state.activeClusterIds.add(f.properties.cluster);
+                                        state.activePlantIds.add(f.properties.id.slice(2));
+                                        state.activeNames.push(f.properties.name);
+                                    }
                                 });
+                                state.sizeActiveClusterIds = state.activeClusterIds.size;
 
 
+                                if (state.activeClusterIds.size === 0) {
 
+                                } else {
 
-                            })
+                                }
+
+                            });
                         });
 
                     });

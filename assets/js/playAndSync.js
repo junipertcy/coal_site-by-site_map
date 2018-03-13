@@ -31,13 +31,13 @@ function sync() {
         let activeLayers = _.map(checkedLayer, 'name');
         console.log(activeLayers);
         if (state._pollutant !== "") {
-            downloadSources(activeLayers);
             $('body').css('cursor', 'progress');
-            setTimeout(function () {
+            downloadSources(activeLayers).then(function () {
                 showActiveLayers(activeLayers);
                 $('body').css('cursor', 'default');
-                $(".cartodb-timeslider").show();
-            }, 3000);
+                d3.select('.cartodb-timeslider').style('display', 'block');
+                d3.select('.mapboxgl-canvas').style('cursor', '');
+            });
         }
     } else {
         showActiveLayers([]);

@@ -1,6 +1,6 @@
 function drawLegend(max) {
     d3.selectAll('svg').remove();
-    d3.select('#panel').append('svg');
+    d3.select('#mapControls').append('svg');
     let sequentialScale = d3.scaleSequential(d3.interpolateLab("#ec7014", "#662506"))
         .domain([0, max]);
 

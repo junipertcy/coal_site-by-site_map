@@ -13,18 +13,21 @@ let state = {
     },
     existingLayers: new Set(),
     activeClusterIds: new Set(),
+    activePlantIds: new Set(),
+    activeNames: [],
+    sizeActiveClusterIds: 0,  // ac-hoc usage for the watch function
     max_concentration: 0,
     activeListings: []
 };
 
 async function downloadSources(activeLayers) {
-    for (let layer of activeLayers) {
-        layer = layer.values().next().value;
+    // console.log('=== in downloadSources; activeLayers are ==', activeLayers);
+    for (const layer of activeLayers) {
         if (!state.availableSources[state._pollutant].has(layer)) {
-            await downloadSource(layer, state._pollutant, function () {
-            });
+            await downloadSource(layer, state._pollutant);
         }
     }
+    console.log('should print later');
 }
 
 function showActiveLayers(activeLayers) {
@@ -37,8 +40,8 @@ function showActiveLayers(activeLayers) {
     console.log('state._pollutant', state._pollutant);
     console.log('activeLayers', activeLayers);
 
-    for (let layer of activeLayers) {
-        layer = layer.values().next().value;
+    for (let layer of Array.from(activeLayers)) {
+        // layer = layer.values().next().value;
         map.addLayer({
             'id': state._pollutant + "_" + layer + "_layer",
             'type': 'fill',
@@ -66,21 +69,35 @@ watch(state, ["_pollutant"], function () {
     state.max_concentration = 0;
     console.log('state.existingLayers', state.existingLayers);
     console.log('state.activeClusterIds', state.activeClusterIds);
-    console.log('state.activeClusterIds.length', state.activeClusterIds.length);
+    console.log('state.activeClusterIds.size', state.activeClusterIds.size);
     if (state.activeClusterIds.size > 0) {
-        let activeLayers = Array(state.activeClusterIds);
+        let activeLayers = state.activeClusterIds;
         console.log('activeLayers', activeLayers);
-        downloadSources(activeLayers);
-        console.log('should be downloaded');
         $('body').css('cursor', 'progress');
-        setTimeout(function () {
+        downloadSources(activeLayers).then(function(){
             showActiveLayers(activeLayers);
             $('body').css('cursor', 'default');
-            $(".cartodb-timeslider").show();
-        }, 4000);
+            d3.select('.cartodb-timeslider').style('display', 'block');
+            d3.select('.mapboxgl-canvas').style('cursor', '');
+        });
     } else {
         showActiveLayers([]);
         $(".cartodb-timeslider").hide();
         d3.selectAll('svg').remove();
     }
+});
+
+// When state.activeClusterIds changed
+// One should change the color of the icons, respectively
+watch(state, ["sizeActiveClusterIds"], function () {
+    console.log('sizeActiveClusterIds changed', state.sizeActiveClusterIds);
+    console.log("activeClusterIds changed to: ", state.activeClusterIds);
+    console.log(Array.from(state.activeNames));
+    let filterArray = ["in", "name"];
+    Array.from(state.activeNames).forEach(function(name){
+        if (typeof(name) !== 'undefined') {
+            filterArray.push(name);
+        }
+    });
+    map.setFilter("points-dblclick", filterArray);
 });
