@@ -1,14 +1,9 @@
 function flyToStore(currentFeature) {
     map.flyTo({
-        center: currentFeature.geometry.coordinates,
+        // center: currentFeature.geometry.coordinates,
         // zoom: 8
     });
 }
-
-function hightlightCoalPlant(){
-
-}
-
 
 function downloadSource(id, pollutant, cb) {
     omnivore.kml('dataset/japan' + id + '_' + pollutant + '_concentration_monthly.kml').on('ready', function (d) {
@@ -119,11 +114,11 @@ function createPopUp(currentFeature) {
             '</div>'
         )
         .addTo(map);
-    if (isSlideOut) {
-        d3.select('.mapboxgl-popup-content').style('left', '310px');
-    } else {
-        d3.select('.mapboxgl-popup-content').style('left', '10px');
-    }
+    // if (isSlideOut) {
+    //     d3.select('.mapboxgl-popup-content').style('left', '310px');
+    // } else {
+    //     d3.select('.mapboxgl-popup-content').style('left', '10px');
+    // }
 
     let close_button = document.getElementsByClassName('mapboxgl-popup-close-button');
     // close_button[0].className = "className"
@@ -203,19 +198,6 @@ function buildLocationList(data) {
 
 }
 
-
-function kml2hex(kml_str) {
-    if (kml_str[0] === '-') {
-        kml_str = kml_str.substr(1)
-    }
-    // let alpha = parseInt(kml_str.slice(0, 2), 16);
-    // let blue = parseInt(kml_str.slice(2, 4).toUpperCase(), 16);
-    // let green = parseInt(kml_str.slice(4, 6).toUpperCase(), 16);
-    // let red = parseInt(kml_str.slice(6, 8).toUpperCase(), 16);
-    // return [red, green, blue, alpha];
-    // rgba = converter.kmlToRgba(kml_str);
-    // return 'rgba(' + rgba.r + ',' + rgba.g + ',' + rgba.b + ',' + rgba.a + ')';
-}
 
 function getColor(level) {
     let color;

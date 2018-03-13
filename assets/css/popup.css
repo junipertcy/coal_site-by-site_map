@@ -26,8 +26,8 @@
 
 .mapboxgl-popup-content {
     position: absolute;
-    left: 10px;
-    bottom: 40px;
+    right: 10px;
+    bottom: 95px;
     padding: 10px 10px 5px;
     width: 320px;
     z-index: 100;
