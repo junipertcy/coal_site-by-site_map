@@ -17,7 +17,8 @@ let state = {
     activeNames: [],
     sizeActiveClusterIds: 0,  // ac-hoc usage for the watch function
     max_concentration: 0,
-    activeListings: []
+    activeListings: [],
+    maxValue: {}
 };
 
 async function downloadSources(activeLayers) {
@@ -59,6 +60,13 @@ function showActiveLayers(activeLayers) {
         state.existingLayers.add(state._pollutant + "_" + layer + "_layer");
         filterBy(0, state._pollutant + "_" + layer + "_layer");  // January
     }
+
+    let maxValueHashKey = state._pollutant + objectHash.sha1(activeLayers);
+    if (typeof state.maxValue[maxValueHashKey] === "undefined") {
+        state.maxValue[maxValueHashKey] = state.max_concentration;
+    } else {
+        state.max_concentration = state.maxValue[maxValueHashKey];
+    }
     drawLegend(state.max_concentration);
 }
 
@@ -75,6 +83,8 @@ watch(state, ["_pollutant"], function () {
         d3.select('body').style('cursor', 'progress');
         downloadSources(activeLayers).then(function(){
             showActiveLayers(activeLayers);
+
+
             d3.select('body').style('cursor', 'default');
             d3.select('.cartodb-timeslider').style('display', 'block');
             d3.select('.mapboxgl-canvas').style('cursor', '');
