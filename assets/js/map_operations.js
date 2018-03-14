@@ -88,12 +88,29 @@ function createPopUp(currentFeature) {
         .setLngLat(currentFeature.geometry.coordinates)
         .setHTML(
             '<div style="text-align: center;">' +
-            '<div style="text-align: center; color: #444"><h2>' + currentFeature.properties.name + '</h2></div>' +
-            '<i class="fa fa-child fa-lg" style="text-align: left;">  影響を受ける学校: 130</i>' +
-            '<br>' +
-            '<br>' +
-            '<table>' +
-            '  </thead>' +
+            // '<div style="text-align: center; color: #444"><h2>' + currentFeature.properties.name + '</h2></div>' +
+            // '<i class="fa fa-child fa-lg" style="text-align: left;">  影響を受ける学校: 130</i>' +
+            '<table id="table_1">' +
+            '<tbody>' +
+            '    <tr>' +
+            '      <td><i class="fa fa-users"></i></td>' +
+            '      <td>  3000 人</td>' +
+            '      <td>' + 'SOx: 1000ppm' + '</td>' +
+            '    </tr>' +
+            '    <tr>' +
+            '      <td><i class="fa fa-graduation-cap"></i></td>' +
+            '      <td>  13 校</td>' +
+            '      <td>' + 'NOx: 1000ppm' + '</td>' +
+            '    </tr>' +
+            '    <tr>' +
+            '      <td><i class="fa fa-hospital"></i></td>' +
+            '      <td>30 院</td>' +
+            '      <td>' + 'PM2.5: 1000ppm' + '</td>' +
+            '    </tr>' +
+            '</tbody>'+
+            '</table>' +
+            '<hr style="border-width: 1px;">' +
+            '<table id="table_2">' +
             '  <tbody>' +
             '    <tr>' +
             '      <td>状況</td>' +
@@ -131,6 +148,8 @@ function createPopUp(currentFeature) {
     close_button[0].style['display'] = 'block';
     close_button[0].style['margin-top'] = '0px';
     close_button[0].style['color'] = 'black';
+    close_button[0].style['font-weight'] = 'bold';
+    close_button[0].style['font-size'] = '18px';
 
     popup.on('close', function (e) {
         let activeItem = document.getElementsByClassName('active');
@@ -201,7 +220,6 @@ function buildLocationList(data) {
             this.parentNode.classList.add('active');
         });
     }
-
 }
 
 

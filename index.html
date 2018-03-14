@@ -11,119 +11,88 @@
     <script src='node_modules/mapbox-gl/dist/mapbox-gl.js'></script>
     <script src='node_modules/@mapbox/leaflet-omnivore/leaflet-omnivore.min.js'></script>
     <script src='node_modules/watchjs/src/watch.min.js'></script>
-    <script src="node_modules/slideout/dist/slideout.js"></script>
+    <script src="node_modules/object-hash/dist/object_hash.js"></script>
 
     <script src='node_modules/d3/build/d3.min.js'></script>
     <script src='node_modules/d3-color/build/d3-color.min.js'></script>
     <script src='node_modules/d3-svg-legend/d3-legend.min.js'></script>
     <script src='node_modules/d3-interpolate/build/d3-interpolate.min.js'></script>
 
-
     <script src="assets/js/map_operations.js"></script>
-    <script src='assets/js/mapbox-gl-language.js'></script>
     <script src='assets/js/coal_plant_listings.js'></script>
     <script src='assets/js/map_style.js'></script>
     <script src='assets/js/semantic/dist/semantic.min.js'></script>
 
-    <link href='https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,700' rel='stylesheet'>
-    <link href='node_modules/leaflet/dist/leaflet.css' rel='stylesheet'/>
-    <link href='node_modules/mapbox-gl/dist/mapbox-gl.css' rel='stylesheet'/>
-    <link href="node_modules/font-awesome/css/font-awesome.min.css" rel="stylesheet">
-
     <link href='assets/js/semantic/dist/semantic.min.css' rel='stylesheet'>
-    <link href='assets/css/slider.css' rel='stylesheet'>
-    <link href='assets/css/cartodb.css' rel='stylesheet'>
-    <link href="assets/css/splashOverlay.css" rel="stylesheet">
+    <link href='assets/css/cartodb-time-slider.css' rel='stylesheet'>
     <link href='assets/css/popup.css' rel='stylesheet'/>
     <link href='assets/css/mapControls.css' rel='stylesheet'/>
-    <link href='assets/css/icons.css' rel='stylesheet'/>
+    <link href="assets/css/Font-Awesome/web-fonts-with-css/css/fontawesome-all.min.css" rel="stylesheet">
+
+    <link href='node_modules/mapbox-gl/dist/mapbox-gl.css' rel='stylesheet'/>
+
 
 </head>
 <body>
 
 <script src="assets/js/higherInteraction.js"></script>
-<script src="assets/js/playAndSync.js"></script>
+<script src="assets/js/playAndRedo.js"></script>
 <script src="assets/js/selectPollutant.js"></script>
 <script src='assets/js/drawLegend.js'></script>
 
-<div style="width: 270px;
-    position: absolute;
-    top: 10px;
-    right: 49px;
-    z-index: 10000;
-    background: white;
-    padding: 10px;
-    border-radius: 5px;
-    height: 81px; display: none;" id="picker">
-    <h5>CHOOSE A POLLUTANT:</h5>
-    <button class="mini ui inverted green icon toggle button"
-            onclick="selectPollutant('no2');">
-        <i class="icon asterisk" id="no2_button"></i>
-        NO2
-    </button>
-    <button class="mini ui inverted green icon toggle button"
-            onclick="selectPollutant('so2');">
-        <i class="icon asterisk" id="so2_button"></i>
-        SO2
-    </button>
-    <button class="mini ui inverted green icon toggle button"
-            onclick="selectPollutant('pm25');">
-        <i class="icon asterisk" id="pm25_button"></i>
-        PM2.5
-    </button>
-    <button class="mini ui inverted blue icon toggle button" onclick="sync();">
-        <i class="sync alternate icon" id="update_button"></i>
-        更新
-    </button>
+<div style="position: absolute; top: 10px; right: 49px; z-index: 10000; background: white; padding: 5px; border-radius: 5px; display: none;" id="picker">
+    <!--<h5>汚染物質を選択:</h5>-->
+    <!--<button class="mini ui inverted green icon toggle button tiny"-->
+            <!--onclick="selectPollutant('no2');">-->
+        <!--<i class="icon asterisk" id="no2_button"></i>-->
+        <!--NO2-->
+    <!--</button>-->
+    <!--<button class="mini ui inverted green icon toggle button"-->
+            <!--onclick="selectPollutant('so2');">-->
+        <!--<i class="icon asterisk" id="so2_button"></i>-->
+        <!--SO2-->
+    <!--</button>-->
+    <!--<button class="mini ui inverted green icon toggle button"-->
+            <!--onclick="selectPollutant('pm25');">-->
+        <!--<i class="icon asterisk" id="pm25_button"></i>-->
+        <!--PM2.5-->
+    <!--</button>-->
+    <!--<button class="mini ui inverted blue icon toggle button" onclick="sync();">-->
+        <!--<i class="sync alternate icon" id="update_button"></i>-->
+        <!--更新-->
+    <!--</button>-->
+    <div class="ui mini basic icon buttons">
+        <button class="ui button left attached" onclick="selectPollutant('no2');" id="no2_button"><i>NO<sub>2</sub></i></button>
+        <button class="ui button left attached" onclick="selectPollutant('so2');" id="so2_button"><i>SO<sub>2</sub></i></button>
+        <button class="ui button left attached" onclick="selectPollutant('pm25');" id="pm25_button"><i>PM<sub>2.5</sub></i></button>
+        <button class="ui button left attached" style="display: none;" id="select_all_plants"><i class="fa fa-industry"></i></button>
+        <button class="ui button right attached" onclick="redo();"><i class="fa fa-redo-alt"></i></button>
+        <button class="ui compact labeled icon button right attached" onclick="play(state.existingLayers);" onmouseenter="playOnMouseover()" id="_play_button">
+            <i class="play icon" id="play_button"></i>
+            <span id="month">汚染物質を選択</span>
+        </button>
+    </div>
+
 </div>
 
 <main id="mapControls">
-    <div id="bottomRight">
-        <div><a href="http://www.greenpeace.org/japan/ja/" target="_blank"
-                style="color: ghostwhite; font-weight: bold;">Greenpeace Japan</a></div>
-        <div style="color: ghostwhite;">Source: TO_BE_FILLED</div>
-    </div>
     <div class="mapbox-attribution-container">
-        <a href="https://www.mapbox.com/about/maps/" style="color: ghostwhite;">© Mapbox | </a>
-        <a href="https://www.openstreetmap.org/copyright" style="color: ghostwhite;">© OpenStreetMap</a>
-    </div>
-
-    <div class="cartodb-timeslider" style="width: 200px; top: 10px; right: 50px; display:none;">
-        <ul>
-            <li class="controls" style="cursor:pointer" onclick="play(state.existingLayers);">
-                <i class="fa fa-play fa-lg" style="margin-left: 20px; position: absolute; margin-top: 13px;"
-                   id="play_button"></i>
-            </li>
-            <li class="time"><p id="month" class="value"></p></li>
-            <li class="last">
-                <input id='slider' style="margin-left: 15px;" type='range' min='0' max='11' step='1' value='0'/>
-            </li>
-        </ul>
+        <a href="https://www.mapbox.com/about/maps/" target="_blank">© Mapbox | </a>
+        <a href="https://www.openstreetmap.org/copyright" target="_blank">© OpenStreetMap | </a>
+        <a href="http://www.greenpeace.org/japan/ja/" target="_blank">© Greenpeace Japan</a>
     </div>
 </main>
 
 <div class="title">
-    <div id="title_content">Hover to a coal plant.</div>
+    <div id="title_content">発電所アイコンの上にマウスをのせる</div>
     <div class="titleHideButton">
         <i class="fa fa-minus-square"></i>
     </div>
 </div>
 <div class="instruction">
-    <i class="fa fa-angle-double-right" id="instruction_content"> Click for more info.</i>
+    <i class="fa fa-angle-double-right" id="instruction_content"> アイコンをクリックして詳細を表示</i>
 
 </div>
-
-
-<script>
-    let slideout = new Slideout({
-        'panel': document.getElementById('mapControls'),
-        'menu': document.getElementById(''),
-        'padding': 300,
-        'tolerance': 70,
-        'touch': false
-    });
-
-</script>
 
 <script>
     let months = [
@@ -236,10 +205,10 @@
                                 d3.select('.instruction').style('display', 'block');
                                 if (state.activeListings.length === 0) {
                                     d3.select('.title').select('#title_content').style('display', "block").text(e.features[0].properties.name);
-                                    d3.select('.instruction').select('#instruction_content').style('display', "block").text(' Click for more info.');
+                                    d3.select('.instruction').select('#instruction_content').style('display', "block").text(' アイコンをクリックして詳細を表示');
                                 } else {
-                                    d3.select('.title').select('#title_content').style('display', "block").text('Select a new coal plant.');
-                                    d3.select('.instruction').select('#instruction_content').style('display', "block").text(' Click to update the info window.');
+                                    d3.select('.title').select('#title_content').style('display', "block").text('石炭火力発電所をえらぶ');
+                                    d3.select('.instruction').select('#instruction_content').style('display', "block").text(' アイコンをクリックして詳細を表示');
                                 }
 
                             });
@@ -259,7 +228,7 @@
 
                                 if (features.length) {
                                     d3.select('.title').select('#title_content').style('display', "block").text(features[0].properties.name);
-                                    d3.select('.instruction').select('#instruction_content').style('display', "block").text('  double click for the pollution layers');
+                                    d3.select('.instruction').select('#instruction_content').style('display', "block").text('  アイコンをダブルクリックしてシミュレーションを表示');
                                     state.activeListings.push(features[0].properties.name);
                                     let clickedPoint = features[0];
                                     flyToStore(clickedPoint);

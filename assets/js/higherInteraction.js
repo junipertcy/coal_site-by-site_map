@@ -21,6 +21,9 @@ let state = {
 };
 
 async function downloadSources(activeLayers) {
+    if (state._pollutant === "") {
+        return;
+    }
     // console.log('=== in downloadSources; activeLayers are ==', activeLayers);
     for (const layer of activeLayers) {
         if (!state.availableSources[state._pollutant].has(layer)) {
@@ -55,10 +58,6 @@ function showActiveLayers(activeLayers) {
         });
         state.existingLayers.add(state._pollutant + "_" + layer + "_layer");
         filterBy(0, state._pollutant + "_" + layer + "_layer");  // January
-        document.getElementById('slider').addEventListener('input', function (e) {
-            let month = parseInt(e.target.value);
-            filterBy(month, state._pollutant + "_" + layer + "_layer");
-        });
     }
     drawLegend(state.max_concentration);
 }
@@ -73,16 +72,17 @@ watch(state, ["_pollutant"], function () {
     if (state.activeClusterIds.size > 0) {
         let activeLayers = state.activeClusterIds;
         console.log('activeLayers', activeLayers);
-        $('body').css('cursor', 'progress');
+        d3.select('body').style('cursor', 'progress');
         downloadSources(activeLayers).then(function(){
             showActiveLayers(activeLayers);
-            $('body').css('cursor', 'default');
+            d3.select('body').style('cursor', 'default');
             d3.select('.cartodb-timeslider').style('display', 'block');
             d3.select('.mapboxgl-canvas').style('cursor', '');
+            d3.select('#select_all_plants').style('display', 'block');
         });
     } else {
         showActiveLayers([]);
-        $(".cartodb-timeslider").hide();
+        d3.select("#picker").style("display", "none");
         d3.selectAll('svg').remove();
     }
 });
