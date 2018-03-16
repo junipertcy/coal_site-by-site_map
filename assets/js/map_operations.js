@@ -1,3 +1,28 @@
+function showInfoWindow(feature) {
+    // Rule 1: At any time, there is one and only one activeListings.
+    if (state.activeListings.length === 1) {
+
+    } else if (state.activeListings.length === 0) {
+        console.log("No state.activeListings; return");
+        return;
+    } else {
+        console.log("[ERROR] this should not happen!");
+        return;
+    }
+
+    flyToStore(feature);
+    createPopUp(feature);
+    setTimeout(function () {
+        d3.select('#heyThisShouldBeActive').attr('class', 'item active')
+    }, 0.001);
+
+    if (state.activeListings.length === 0) {
+        map.setFilter("points-hover", ["==", "name", ""]);
+    } else {
+        map.setFilter("points-hover", ["==", "name", feature.properties.name]);
+    }
+}
+
 function flyToStore(currentFeature) {
     map.flyTo({
         // center: currentFeature.geometry.coordinates,
@@ -31,7 +56,7 @@ function getKmlAndReturnPromise(id, pollutant) {
                 }
             }
             let pre_data = _.map(ls, 'feature');
-
+            maxConcentration = 0;
             pre_data.map(function (d) {
                 try {
                     d.properties.month = new Date(d.properties.timespan.end).getMonth();
@@ -47,14 +72,15 @@ function getKmlAndReturnPromise(id, pollutant) {
                     let color = d3.interpolateLab("#ec7014", "#662506");
                     // console.log('d.properties.name =', d.properties.name);
                     d.properties.color = color(parseFloat(d.properties.name.split(" - ")[0]));
-                    if (parseFloat(d.properties.name.split(" - ")) > state.max_concentration) {
-                        state.max_concentration = parseFloat(d.properties.name.split(" - "));
+                    if (parseFloat(d.properties.name.split(" - ")) > maxConcentration) {
+                        maxConcentration = parseFloat(d.properties.name.split(" - "));
                     }
                 } catch (e) {
                     console.log(d);
                 }
                 return d;
             });
+            state.maxConcentrationDict[sourceName] = maxConcentration;
 
             console.log("[INFO] sourceName = ", sourceName, " Downloaded!");
             map.addSource(sourceName, {
@@ -72,9 +98,7 @@ function getKmlAndReturnPromise(id, pollutant) {
 
 async function downloadSource(id, pollutant) {
     await getKmlAndReturnPromise(id, pollutant);
-    console.log('should print first');
 }
-
 
 function createPopUp(currentFeature) {
     let id = currentFeature.properties.id.slice(2);
@@ -84,64 +108,88 @@ function createPopUp(currentFeature) {
     if (popUps[0]) {
         popUps[0].remove();
     }
+
     let popup = new mapboxgl.Popup({closeOnClick: true, closeButton: true})
         .setLngLat(currentFeature.geometry.coordinates)
         .setHTML(
-            '<div style="text-align: center;">' +
-            // '<div style="text-align: center; color: #444"><h2>' + currentFeature.properties.name + '</h2></div>' +
-            // '<i class="fa fa-child fa-lg" style="text-align: left;">  影響を受ける学校: 130</i>' +
-            '<table id="table_1">' +
-            '<tbody>' +
-            '    <tr>' +
-            '      <td><i class="fa fa-users"></i></td>' +
-            '      <td>  3000 人</td>' +
-            '      <td>' + 'SOx: 1000ppm' + '</td>' +
-            '    </tr>' +
-            '    <tr>' +
-            '      <td><i class="fa fa-graduation-cap"></i></td>' +
-            '      <td>  13 校</td>' +
-            '      <td>' + 'NOx: 1000ppm' + '</td>' +
-            '    </tr>' +
-            '    <tr>' +
-            '      <td><i class="fa fa-hospital"></i></td>' +
-            '      <td>30 院</td>' +
-            '      <td>' + 'PM2.5: 1000ppm' + '</td>' +
-            '    </tr>' +
-            '</tbody>'+
-            '</table>' +
+            '<div class="ui grid">' +
+            '<div class="sixteen wide column" style="text-align: left; left: 14px;">' +
+            currentFeature.properties.name +
+            '</div>' +
+            '</div>' +
+            '<hr style="border-width: 2px;">' +
+            '<div class="ui grid">' +
+            '<div class="six wide column" style="text-align: center; left: 12px;">' +
+            '<div class="row">' +
+            "静岡県" +
+            '</div>' +
+            '<div class="row">' +
+            '<div class="ui mini horizontal divided list" style="font-size: 13px;">' +
+              '<div class="item">'+
+                '<i class="fa fa-graduation-cap"><span style="color:transparent;">_</span>13 校</i>' +
+              '</div>' +
+              '<div class="item">' +
+                '<i class="fa fa-hospital"><span style="color:transparent;">–</span>30 院</i>' +
+              '</div>' +
+            '</div>' +
+            '</div>' +
+            '</div>' +
+            '<div class="ten wide stretched column">' +
+            '<div class="ui mini three statistics" style="font-size: 12px">' +
+
+            '<div class="olive statistic">' +
+            '<div class="value">' +
+                30.4 +
+            '</div>' +
+            '<div class="label">' +
+                'NO<sub>2</sub><small> (ppm)</small>' +
+            '</div>' +
+            '</div>' +
+            '<div class="yellow statistic">' +
+            '<div class="value">' +
+                38.2 +  // TODO!
+            '</div>' +
+            '<div class="label">' +
+                'SO<sub>2</sub><small> (ppm)</small>' +
+            '</div>' +
+            '</div>' +
+            '<div class="brown statistic">' +
+            '<div class="value">' +
+                89.3 +  // TODO!
+            '</div>' +
+            '<div class="label">' +
+                'PM<sub>2.5</sub><small> (ppm)</small>' +
+            '</div>' +
+            '</div>' +
+            '</div>' +
+            '</div>' +
+            '</div>' +
             '<hr style="border-width: 1px;">' +
-            '<table id="table_2">' +
-            '  <tbody>' +
-            '    <tr>' +
-            '      <td>状況</td>' +
-            '      <td>' + currentFeature.properties.status + '</td>' +
-            '    </tr>' +
-            '    <tr>' +
-            '      <td>最大発電能力</td>' +
-            '      <td>' + currentFeature.properties.capacity + '</td>' +
-            '    </tr>' +
-            '    <tr>' +
-            '      <td>企業名／運営会社</td>' +
-            '      <td>' + currentFeature.properties.operator + '</td>' +
-            '    </tr>' +
-            '    <tr>' +
-            '      <td>親会社／出資者等</td>' +
-            '      <td>' + currentFeature.properties.investors + '</td>' +
-            '    </tr>' +
-            '    <tr>' +
-            '      <td>燃料</td>' +
-            '      <td>' + currentFeature.properties.fuels_used + '</td>' +
-            '    </tr>' +
-            '  </tbody>' +
-            '</table>' +
+            '<div class="ui grid">' +
+            '<div class="six wide column">' +
+            '<div class="ui secondary vertical pointing menu mini" style="font-size: 12px;">' +
+            '<a class="item active" id="heyThisShouldBeActive">' +
+            '状況 (最大発電能力)' +
+            '</a>' +
+            '<a class="item">' +
+            '企業名／運営会社' +
+            '</a>' +
+            '<a class="item">' +
+            '親会社／出資者等' +
+            '</a>' +
+            '<a class="item">' +
+            '燃料' +
+            '</a>' +
+            '</div>' +
+            '</div>' +
+            '<div class="ten wide stretched column">' +
+            '<div class="ui attached stacked left aligned green segment" id="segment" style="font-size: 12px;">' +
+            '<p>' + currentFeature.properties.status + ' (' + currentFeature.properties.capacity + ')' + '</p>' +
+            '</div>' +
+            '</div>' +
             '</div>'
         )
         .addTo(map);
-    // if (isSlideOut) {
-    //     d3.select('.mapboxgl-popup-content').style('left', '310px');
-    // } else {
-    //     d3.select('.mapboxgl-popup-content').style('left', '10px');
-    // }
 
     let close_button = document.getElementsByClassName('mapboxgl-popup-close-button');
     // close_button[0].className = "className"
@@ -150,87 +198,36 @@ function createPopUp(currentFeature) {
     close_button[0].style['color'] = 'black';
     close_button[0].style['font-weight'] = 'bold';
     close_button[0].style['font-size'] = '18px';
+    close_button[0].style['z-index'] = 100000;
 
     popup.on('close', function (e) {
-        let activeItem = document.getElementsByClassName('active');
-        if (activeItem[0]) {
-            activeItem[0].classList.remove('active');
-            map.flyTo({
-                // center: currentFeature.geometry.coordinates,
-                // zoom: 5
-            })
-        }
-
-    });
-}
-
-function buildLocationList(data) {
-    // Iterate through the list of stores
-    for (let i = 0; i < data.features.length; i++) {
-        let currentFeature = data.features[i];
-        // Shorten data.feature.properties to just `prop` so we're not
-        // writing this long form over and over again.
-        let prop = currentFeature.properties;
-        // console.log(prop);
-        // Select the listing container in the HTML and append a div
-        // with the class 'item' for each store
-        let listings = document.getElementById('listings');
-        let listing = listings.appendChild(document.createElement('div'));
-        listing.className = 'item';
-        listing.id = 'listing-' + prop.id.slice(2);
-        // console.log(listing.id);
-        // if (prop.id.slice(2) === "42") {
-        //     console.log(prop);
-        // }
-
-        // Create a new link with the class 'title' for each store
-        // and fill it with the store address
-        let link = listing.appendChild(document.createElement('a'));
-        link.href = '#';
-        link.className = 'title';
-        link.dataPosition = i;
-        link.innerHTML = prop.name;
-
-        // Create a new div with the class 'details' for each store
-        // and fill it with the city and phone number
-        let details = listing.appendChild(document.createElement('div'));
-
-        let checkbox = details.appendChild(document.createElement('div'));
-        checkbox.className = 'ui checkbox';
-        let input = checkbox.appendChild(document.createElement('input'));
-        input.type = 'checkbox';
-        input.name = prop.cluster;
-        let label = checkbox.appendChild(document.createElement('label'));
-        label.innerHTML = prop.capacity;
-        if (prop.status) {
-            label.innerHTML += ' &middot; ' + prop.status;
-        }
-
-        // Add an event listener for the links in the sidebar listing
-        link.addEventListener('click', function (e) {
-            console.log("You clicked the list!");
-            let clickedListing = data.features[this.dataPosition];
-            flyToStore(clickedListing);
-            createPopUp(clickedListing);
-            let activeItem = document.getElementsByClassName('active');
-
-            if (activeItem[0]) {
-                activeItem[0].classList.remove('active');
+        map.setFilter("points-hover", ["==", "name", ""]);
+        // Similar function to watch(state, ["sizeActiveClusterIds"], function () {});
+        let filterArray = ["in", "name"];
+        Array.from(state.activeNames).forEach(function(name){
+            if (typeof(name) !== 'undefined') {
+                filterArray.push(name);
             }
-            this.parentNode.classList.add('active');
         });
-    }
-}
+        map.setFilter("points-dblclick", filterArray);
+    });
 
+    $('.ui .item').on('click', function () {
+        let expr = this.text;
+        if (expr === '状況 (最大発電能力)') {
+            d3.select('#segment').text(currentFeature.properties.status + ' (' + currentFeature.properties.capacity + ')');
+        } else if (expr === '親会社／出資者等') {
+            d3.select('#segment').text(currentFeature.properties.investors);
+        } else if (expr === '企業名／運営会社') {
+            d3.select('#segment').text(currentFeature.properties.operator);
+        } else if (expr === '燃料') {
+            d3.select('#segment').text(currentFeature.properties.fuels_used);
+        } else {
+            return;
+        }
+        $('.ui .item').removeClass('active');
+        $(this).addClass('active');
+    });
+    d3.selectAll('.ui .item').style('padding', '8px');
 
-function getColor(level) {
-    let color;
-    if (level === '0.05 - 0.1') {
-        color = '#5990e2'
-    } else if (level === '0.1 - 0.2') {
-        color = '#FCA107'
-    } else if (level === '0.2 - 0.3') {
-        color = '#7f3121'
-    }
-    return color;
 }

@@ -1,6 +1,7 @@
-let isSlideOut = false;
+let isDBLClick = false;
 let state = {
     is_play: false,
+    isToggleOpen: true,
     isPollutantSelected: false,
     month: 0,
     _layerName: '',
@@ -16,7 +17,7 @@ let state = {
     activePlantIds: new Set(),
     activeNames: [],
     sizeActiveClusterIds: 0,  // ac-hoc usage for the watch function
-    max_concentration: 0,
+    maxConcentrationDict: {},
     activeListings: [],
     maxValue: {}
 };
@@ -31,21 +32,18 @@ async function downloadSources(activeLayers) {
             await downloadSource(layer, state._pollutant);
         }
     }
-    console.log('should print later');
+    // console.log('should print later');
 }
 
 function showActiveLayers(activeLayers) {
-    console.log('max_concentration = ', state.max_concentration);
     state.existingLayers.forEach(function (o) {
         map.removeLayer(o);
     });
     state.existingLayers = new Set();
-    console.log('===== In showActiveLayers =====');
-    console.log('state._pollutant', state._pollutant);
-    console.log('activeLayers', activeLayers);
+    let max_concentration = 0;
+    let maxValueHashKey = state._pollutant + objectHash.sha1(activeLayers);
 
     for (let layer of Array.from(activeLayers)) {
-        // layer = layer.values().next().value;
         map.addLayer({
             'id': state._pollutant + "_" + layer + "_layer",
             'type': 'fill',
@@ -58,41 +56,44 @@ function showActiveLayers(activeLayers) {
             }
         });
         state.existingLayers.add(state._pollutant + "_" + layer + "_layer");
-        filterBy(0, state._pollutant + "_" + layer + "_layer");  // January
+        filterBy(0, state._pollutant + "_" + layer + "_layer");  // January  // TODO: change the month sign;
+
+        if (state.maxConcentrationDict[state._pollutant + "_" + layer] > max_concentration) {
+            max_concentration = state.maxConcentrationDict[state._pollutant + "_" + layer];
+        }
     }
 
-    let maxValueHashKey = state._pollutant + objectHash.sha1(activeLayers);
     if (typeof state.maxValue[maxValueHashKey] === "undefined") {
-        state.maxValue[maxValueHashKey] = state.max_concentration;
+        state.maxValue[maxValueHashKey] = max_concentration;
     } else {
-        state.max_concentration = state.maxValue[maxValueHashKey];
+        max_concentration = state.maxValue[maxValueHashKey];
     }
-    drawLegend(state.max_concentration);
+    drawLegend(max_concentration);
 }
 
 //defining a 'watcher' for an attribute
 watch(state, ["_pollutant"], function () {
-    console.log("_pollutant changed: ", state._pollutant);
-    state.max_concentration = 0;
-    console.log('state.existingLayers', state.existingLayers);
-    console.log('state.activeClusterIds', state.activeClusterIds);
-    console.log('state.activeClusterIds.size', state.activeClusterIds.size);
+
+    console.log("[Watch::_pollutant] _pollutant changed: ", state._pollutant);
+    // console.log('state.existingLayers', state.existingLayers);
+    // console.log('state.activeClusterIds', state.activeClusterIds);
+    // console.log('state.activeClusterIds.size', state.activeClusterIds.size);
     if (state.activeClusterIds.size > 0) {
         let activeLayers = state.activeClusterIds;
-        console.log('activeLayers', activeLayers);
+        // console.log('activeLayers', activeLayers);
         d3.select('body').style('cursor', 'progress');
         downloadSources(activeLayers).then(function(){
             showActiveLayers(activeLayers);
+            $('#_play_button').removeClass('loading');
 
 
             d3.select('body').style('cursor', 'default');
-            d3.select('.cartodb-timeslider').style('display', 'block');
             d3.select('.mapboxgl-canvas').style('cursor', '');
-            d3.select('#select_all_plants').style('display', 'block');
+            // d3.select('#select_all_plants').style('display', 'block');
         });
     } else {
         showActiveLayers([]);
-        d3.select("#picker").style("display", "none");
+        // d3.select("#picker").style("display", "none");
         d3.selectAll('svg').remove();
     }
 });
@@ -100,9 +101,9 @@ watch(state, ["_pollutant"], function () {
 // When state.activeClusterIds changed
 // One should change the color of the icons, respectively
 watch(state, ["sizeActiveClusterIds"], function () {
-    console.log('sizeActiveClusterIds changed', state.sizeActiveClusterIds);
-    console.log("activeClusterIds changed to: ", state.activeClusterIds);
-    console.log(Array.from(state.activeNames));
+    // console.log('sizeActiveClusterIds changed', state.sizeActiveClusterIds);
+    // console.log("activeClusterIds changed to: ", state.activeClusterIds);
+    // console.log(Array.from(state.activeNames));
     let filterArray = ["in", "name"];
     Array.from(state.activeNames).forEach(function(name){
         if (typeof(name) !== 'undefined') {

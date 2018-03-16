@@ -7,12 +7,12 @@ function drawLegend(max) {
     let svg = d3.select("svg")
         .style("background", "white")
         .style("opacity", 0.9)
-        .style("border-radius", "25px")
-        .style("border", "2px solid #73AD21");
+        .style("border-radius", "10px")
+        .style("border", "2px solid #999999");
 
     svg.append("g")
         .attr("class", "legendSequential")
-        .attr("transform", "translate(20,20)");
+        .attr("transform", "translate(10,15)");
 
     let legendSequential = d3.legendColor()
         .shapeWidth(30)
@@ -23,5 +23,5 @@ function drawLegend(max) {
 
     svg.select(".legendSequential")
         .call(legendSequential);
-    svg.style('left', '10px');
+    svg.style('right', '5vh');
 }

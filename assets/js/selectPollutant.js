@@ -1,17 +1,21 @@
 function selectPollutant(pollutant) {
-    // state.existingLayers.forEach(function (o) {
-    //     map.removeLayer(o);
-    // });
-    // state.availableSources.no2.clear();
-    // state.availableSources.so2.clear();
-    // state.availableSources.pm25.clear();
+    if (!state.activeClusterIds.size) {
+        _blink();
+        return;
+    }
 
 
-    state._pollutant = pollutant;
-    $('#' + pollutant + '_button').addClass('active').siblings().removeClass('active');
+    if (pollutant !== state._pollutant) {
+        state._pollutant = pollutant;
+        $('#' + pollutant + '_button').addClass('active').siblings().removeClass('active');
 
-    // d3.select('#picker').style('display', 'none');
-    // d3.select('#mapControls').style('cursor', 'pointer');
-    d3.select('.mapboxgl-canvas').style('cursor', 'progress');
+        d3.select('.mapboxgl-canvas').style('cursor', 'progress');
 
+        let playButton = $('#_play_button');
+        if (state.is_play) {
+            playButton.click();
+            state.month = 0;
+        }
+        playButton.addClass('loading');
+    }
 }

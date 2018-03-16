@@ -23,15 +23,16 @@
     <script src="assets/js/map_operations.js"></script>
     <script src='assets/js/coal_plant_listings.js'></script>
     <script src='assets/js/map_style.js'></script>
-    <script src='assets/js/semantic/dist/semantic.min.js'></script>
 
-    <link href='assets/js/semantic/dist/semantic.min.css' rel='stylesheet'>
-    <link href='assets/css/cartodb-time-slider.css' rel='stylesheet'>
     <link href='assets/css/popup.css' rel='stylesheet'/>
     <link href='assets/css/mapControls.css' rel='stylesheet'/>
     <link href="assets/css/Font-Awesome/web-fonts-with-css/css/fontawesome-all.min.css" rel="stylesheet">
 
     <link href='node_modules/mapbox-gl/dist/mapbox-gl.css' rel='stylesheet'/>
+
+    <script src='assets/js/semantic/dist/semantic.min.js'></script>
+
+    <link href='assets/js/semantic/dist/semantic.min.css' rel='stylesheet'>
 
 
 </head>
@@ -42,41 +43,31 @@
 <script src="assets/js/selectPollutant.js"></script>
 <script src='assets/js/drawLegend.js'></script>
 
-<div style="position: absolute; top: 10px; right: 49px; z-index: 10000; background: white; padding: 5px; border-radius: 5px; display: none;" id="picker">
-    <!--<h5>汚染物質を選択:</h5>-->
-    <!--<button class="mini ui inverted green icon toggle button tiny"-->
-            <!--onclick="selectPollutant('no2');">-->
-        <!--<i class="icon asterisk" id="no2_button"></i>-->
-        <!--NO2-->
-    <!--</button>-->
-    <!--<button class="mini ui inverted green icon toggle button"-->
-            <!--onclick="selectPollutant('so2');">-->
-        <!--<i class="icon asterisk" id="so2_button"></i>-->
-        <!--SO2-->
-    <!--</button>-->
-    <!--<button class="mini ui inverted green icon toggle button"-->
-            <!--onclick="selectPollutant('pm25');">-->
-        <!--<i class="icon asterisk" id="pm25_button"></i>-->
-        <!--PM2.5-->
-    <!--</button>-->
-    <!--<button class="mini ui inverted blue icon toggle button" onclick="sync();">-->
-        <!--<i class="sync alternate icon" id="update_button"></i>-->
-        <!--更新-->
-    <!--</button>-->
+<div style="position: absolute; top: 5vh; right: 10px; z-index: 10000; background: white; padding: 5px; border-radius: 5px;"
+     id="picker">
     <div class="ui mini basic icon buttons">
-        <button class="ui button left attached" onclick="selectPollutant('no2');" id="no2_button"><i>NO<sub>2</sub></i></button>
-        <button class="ui button left attached" onclick="selectPollutant('so2');" id="so2_button"><i>SO<sub>2</sub></i></button>
-        <button class="ui button left attached" onclick="selectPollutant('pm25');" id="pm25_button"><i>PM<sub>2.5</sub></i></button>
-        <button class="ui button left attached" style="display: none;" id="select_all_plants"><i class="fa fa-industry"></i></button>
-        <button class="ui button right attached" onclick="redo();"><i class="fa fa-redo-alt"></i></button>
-        <button class="ui compact labeled icon button right attached" onclick="play(state.existingLayers);" onmouseenter="playOnMouseover()" id="_play_button">
+        <button class="ui button left attached" onclick="selectPollutant('pm25');" id="pm25_button"><i>PM<sub>2.5</sub></i>
+        </button>
+        <button class="ui button left attached" onclick="selectPollutant('no2');" id="no2_button"><i>NO<sub>2</sub></i>
+        </button>
+        <button class="ui button left attached" onclick="selectPollutant('so2');" id="so2_button"><i>SO<sub>2</sub></i>
+        </button>
+        <button class="ui button left attached" id="select_all_plants" onclick="dblClickAll();" data-tooltip="Select all plants (this needs a translation)." data-position="bottom center"><i
+                class="fa fa-industry"></i></button>
+        <button class="ui button right attached" id="show_info_window"
+                onclick="showInfoWindow(state.activeListings[0]);" data-tooltip="Show more information (this needs a translation)." data-position="bottom center"><i
+                class="fa fa-info"></i></button>
+        <button class="ui button right attached" onclick="redo();" data-tooltip="De-select all plants (this needs a translation)." data-position="bottom center"><i class="fa fa-redo-alt"></i></button>
+        <button class="ui compact labeled icon button right attached" onclick="play(state.existingLayers);"
+                onmouseenter="playOnMouseover()" id="_play_button">
             <i class="play icon" id="play_button"></i>
-            <span id="month">汚染物質を選択</span>
+            <span id="month">石炭火力発電所をえらぶ</span>
         </button>
     </div>
 
 </div>
 
+<!--汚染物質を選択-->
 <main id="mapControls">
     <div class="mapbox-attribution-container">
         <a href="https://www.mapbox.com/about/maps/" target="_blank">© Mapbox | </a>
@@ -85,16 +76,17 @@
     </div>
 </main>
 
-<div class="title">
-    <div id="title_content">発電所アイコンの上にマウスをのせる</div>
-    <div class="titleHideButton">
-        <i class="fa fa-minus-square"></i>
-    </div>
-</div>
-<div class="instruction">
-    <i class="fa fa-angle-double-right" id="instruction_content"> アイコンをクリックして詳細を表示</i>
-
-</div>
+<div class="titleContainer" style="display: none;"></div>
+<!--<div class="ui grid" style="width: 378px; height: 70px;" id="toggleContent">-->
+<!--<div class="sixteen column row">-->
+<!--<div class="fourteen wide column" id="title_content">発電所アイコンの上にマウスをのせる</div>-->
+<!--<div class="one floated column" style="z-index: 1000;" onmouseenter="d3.select(this).style('cursor', 'pointer');" onmouseleave="d3.select(this).style('cursor', 'default');" onclick="toogleTitleContent();"><i class="fa fa-minus-square" id="toggleInstructionIcon"></i></div>-->
+<!--</div>-->
+<!--<div class="row" style="font-size: 11px; bottom: 25px;">-->
+<!--<div class="one wide column"></div>-->
+<!--<div class="fourteen wide column"><i class="fa fa-angle-double-right" id="instruction_content"> アイコンをクリックして詳細を表示</i></div>-->
+<!--</div>-->
+<!--</div>-->
 
 <script>
     let months = [
@@ -130,9 +122,9 @@
         touchZoomRotate: true
     });
 
-    map.addControl(new mapboxgl.NavigationControl(), 'top-right');
+    map.addControl(new mapboxgl.NavigationControl(), 'top-left');
     map.addControl(new mapboxgl.ScaleControl({
-        maxWidth: 160,
+        maxWidth: 200,
         unit: 'metric'
     }));
 
@@ -162,26 +154,9 @@
                             'icon-allow-overlap': true
                         }
                     });
-                    map.loadImage('assets/css/img/factoryTransp3.png', function (error, image) {
-                        map.addImage('industry_red', image);
-                        map.addLayer({
-                            "id": "points-hover",
-                            "type": "symbol",
-                            "interactive": true,
-                            "source": {
-                                "type": "geojson",
-                                "data": plants
-                            },
-                            "filter": ["==", "name", ""],
-                            "layout": {
-                                "icon-image": "industry_red",
-                                "icon-size": 0.08,
-                                'icon-ignore-placement': true,
-                                'icon-allow-overlap': true
-                            }
-                        });
-                        map.loadImage('assets/css/img/factoryTransp3_red.png', function (error, image) {
-                            map.addImage('industry_selected', image);
+                    map.loadImage('assets/css/img/factoryTransp3_red.png', function (error, image) {
+
+                        map.addImage('industry_selected', image);
                             map.addLayer({
                                 "id": "points-dblclick",
                                 "type": "symbol",
@@ -199,89 +174,121 @@
                                 }
                             });
 
-                            // Add other map event listeners here:
-                            map.on("mousemove", "points", function (e) {
-                                map.getCanvas().style.cursor = 'pointer';
-                                // map.setFilter("points-hover", ["==", "name", e.features[0].properties.name]);
-                                d3.select('.title').style('display', 'block');
-                                d3.select('.instruction').style('display', 'block');
-                                if (state.activeListings.length === 0) {
-                                    d3.select('.title').select('#title_content').style('display', "block").text(e.features[0].properties.name);
-                                    d3.select('.instruction').select('#instruction_content').style('display', "block").text(' アイコンをクリックして詳細を表示');
-                                } else {
-                                    d3.select('.title').select('#title_content').style('display', "block").text('石炭火力発電所をえらぶ');
-                                    d3.select('.instruction').select('#instruction_content').style('display', "block").text(' アイコンをクリックして詳細を表示');
+                        map.loadImage('assets/css/img/factoryTransp3_green.png', function (error, image) {
+                            map.addImage('industry_red', image);
+                            map.addLayer({
+                                "id": "points-hover",
+                                "type": "symbol",
+                                "interactive": true,
+                                "source": {
+                                    "type": "geojson",
+                                    "data": plants
+                                },
+                                "filter": ["==", "name", ""],
+                                "layout": {
+                                    "icon-image": "industry_red",
+                                    "icon-size": 0.08,
+                                    'icon-ignore-placement': true,
+                                    'icon-allow-overlap': true
                                 }
-
+                            });
+                            // Add other map event listeners here:
+                            map.on("mouseenter", "points", function (e) {
+                                map.getCanvas().style.cursor = 'pointer';
+                                // d3.select('#title_content').style('display', "block").text(e.features[0].properties.name);
+                                // d3.select('#instruction_content').style('display', "block").text(' アイコンをクリックして詳細を表示');
+                                // map.setFilter("points-hover", ["==", "name", e.features[0].properties.name]);
                             });
                             map.on("mouseleave", "points", function (e) {
                                 map.getCanvas().style.cursor = '';
                                 if (state.activeListings.length === 0) {
-                                    // d3.select('.title').style('display', "none");
-                                    // d3.select('.instruction').style('display', "none");
-                                }
-                            });
-
-                            map.on('click', function (e) {
-                                // Rule 1: At any time, there is one and only one activeListings.
-                                let features = map.queryRenderedFeatures(e.point, {layers: ['points']});
-
-                                state.activeListings.pop();
-
-                                if (features.length) {
-                                    d3.select('.title').select('#title_content').style('display', "block").text(features[0].properties.name);
-                                    d3.select('.instruction').select('#instruction_content').style('display', "block").text('  アイコンをダブルクリックしてシミュレーションを表示');
-                                    state.activeListings.push(features[0].properties.name);
-                                    let clickedPoint = features[0];
-                                    flyToStore(clickedPoint);
-                                    createPopUp(clickedPoint);
+                                    // d3.select('#title_content').style('display', "block").text('石炭火力発電所をえらぶ');
+                                    // d3.select('#instruction_content').style('display', "block").text(' アイコンをクリックして詳細を表示');
                                 } else {
-                                    console.log('clicked map, but not on a icon.');
-                                }
-
-                                if (state.activeListings.length === 0) {
-                                    map.setFilter("points-hover", ["==", "name", ""]);
-                                } else {
-                                    map.setFilter("points-hover", ["==", "name", features[0].properties.name]);
+                                    // d3.select('#title_content').style('display', "block").text(state.activeListings[state.activeListings.length - 1]);
+                                    // d3.select('#instruction_content').style('display', "block").text(' アイコンをクリックして詳細を表示');
                                 }
                             });
                             map.on('dblclick', function (e) {
+                                isDBLClick = !isDBLClick;
                                 let features = map.queryRenderedFeatures(e.point, {layers: ['points']});
-                                // map.setFilter("points-dblclick", ["==", "name", features[0].properties.name]);
-                                d3.select('#picker').style('display', 'block');
-                                d3.select('.cartodb-timeslider').style('display', 'none');
-                                features.forEach(function(f) {
-                                    console.log(f.properties);
-                                    if (state.activePlantIds.has(f.properties.id.slice(2))) {
-                                        state.activeClusterIds.delete(f.properties.cluster);
-                                        state.activePlantIds.delete(f.properties.id.slice(2));
-                                        let index = 0;
-                                        state.activeNames.forEach(function(name){
-                                            console.log('===== in the forEach =====');
-                                            console.log('name is', name);
-                                            console.log('f.properties.name is', f.properties.name);
-                                            if (name === f.properties.name) {
-                                                delete state.activeNames[index];
-                                            }
-                                            // state.activeNames.shift();
-                                            state.activeNames = Array.from(new Set(state.activeNames));
-                                            index += 1;
-                                        });
-                                    } else {
-                                        state.activeClusterIds.add(f.properties.cluster);
-                                        state.activePlantIds.add(f.properties.id.slice(2));
-                                        state.activeNames.push(f.properties.name);
-                                    }
-                                });
-                                state.sizeActiveClusterIds = state.activeClusterIds.size;
-
-
-                                if (state.activeClusterIds.size === 0) {
-
+                                if (!features.length) {
+                                    console.log('[dblclick] clicked map, but not on a icon. No actions.');
                                 } else {
+                                    setTimeout(function(){
+                                        features.forEach(function (f) {
+                                            if (state.activePlantIds.has(f.properties.id.slice(2))) {
+                                                // Delete the selection
+                                                state.activeClusterIds.delete(f.properties.cluster);
+                                                state.activePlantIds.delete(f.properties.id.slice(2));
+                                                let index = 0;
+                                                state.activeNames.forEach(function (name) {
+                                                    if (name === f.properties.name) {
+                                                        delete state.activeNames[index];
+                                                    }
+                                                    // state.activeNames.shift();
+                                                    state.activeNames = Array.from(new Set(state.activeNames));
+                                                    index += 1;
+                                                });
+                                            } else {
+                                                // Add new selection
+                                                state.activeClusterIds.add(f.properties.cluster);
+                                                state.activePlantIds.add(f.properties.id.slice(2));
+                                                state.activeNames.push(f.properties.name);
 
+                                                state.activeListings.shift();
+                                                state.activeListings.push(features[0]);
+                                            }
+                                            state.sizeActiveClusterIds = state.activeClusterIds.size;
+                                        });
+                                        isDBLClick = false;
+                                        console.log("dblclick", state);
+                                    }, 300);
                                 }
+                            });
+                            map.on('click', function (e) {
+                                let features = map.queryRenderedFeatures(e.point, {layers: ['points']});
+                                if (!features.length) {
+                                    console.log('[click] clicked map, but not on a icon. No actions.');
+                                } else {
+                                    setTimeout(function () {
+                                        if (isDBLClick) {
+                                            console.log('dbclick (in click)');
+                                        } else {
+                                            console.log('click (in click)');
+                                            redo();
+                                            // map.setFilter("points-dblclick", ["==", "name", features[0].properties.name]);
+                                            state.activeClusterIds.clear();
+                                            state.activePlantIds.clear();
+                                            state.activeNames = [];
+                                            state.activeListings = [];
 
+                                            features.forEach(function (f) {
+                                                state.activeClusterIds.add(f.properties.cluster);
+                                                state.activePlantIds.add(f.properties.id.slice(2));
+                                                state.activeNames.push(f.properties.name);
+
+                                                state.activeListings.shift();
+                                                state.activeListings.push(features[0]);
+                                            });
+
+                                            if (state.activeClusterIds.size === 1) {
+                                                map.setFilter("points-dblclick", ["==", "name", features[0].properties.name]);
+                                            } else {
+                                                console.log('[ERROR] This should not happen');
+                                            }
+
+                                            if (state.activeClusterIds.size === 0) {
+
+                                            } else {
+                                                // $('#pm25_button').click();
+                                            }
+                                            state.sizeActiveClusterIds = state.activeClusterIds.size;
+                                            d3.select("#month").text('汚染物質を選択');
+                                            console.log("click", state);
+                                        }
+                                    }, 300);
+                                }
                             });
                         });
 
@@ -290,8 +297,10 @@
             }
         }
     });
+
 </script>
-
-
 </body>
+<script>
+
+</script>
 </html>

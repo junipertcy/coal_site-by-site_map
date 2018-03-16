@@ -80,9 +80,8 @@
 
 #mapControls svg {
     position: absolute;
-    top: 1%;
-    left: 50px;
+    bottom: 5vh;
     z-index: 1000;
-    width: 95px;
-    height: 115px;
+    width: 80px;
+    height: 105px;
 }
