@@ -34,16 +34,14 @@
 
     <link href='assets/js/semantic/dist/semantic.min.css' rel='stylesheet'>
 
-
+    <script src="assets/js/higherInteraction.js"></script>
+    <script src="assets/js/playAndRedo.js"></script>
+    <script src="assets/js/selectPollutant.js"></script>
+    <script src='assets/js/drawLegend.js'></script>
 </head>
 <body>
 
-<script src="assets/js/higherInteraction.js"></script>
-<script src="assets/js/playAndRedo.js"></script>
-<script src="assets/js/selectPollutant.js"></script>
-<script src='assets/js/drawLegend.js'></script>
-
-<div style="position: absolute; top: 5vh; right: 10px; z-index: 10000; background: white; padding: 5px; border-radius: 5px;"
+<div style="position: absolute; top: 1vh; right: 1vw; z-index: 10000; background: white; padding: 5px; border-radius: 5px;"
      id="picker">
     <div class="ui mini basic icon buttons">
         <button class="ui button left attached" onclick="selectPollutant('pm25');" id="pm25_button"><i>PM<sub>2.5</sub></i>
@@ -52,12 +50,12 @@
         </button>
         <button class="ui button left attached" onclick="selectPollutant('so2');" id="so2_button"><i>SO<sub>2</sub></i>
         </button>
-        <button class="ui button left attached" id="select_all_plants" onclick="dblClickAll();" data-tooltip="Select all plants (this needs a translation)." data-position="bottom center"><i
+        <button class="ui button left attached" id="select_all_plants" onclick="dblClickAll();" data-tooltip="全ての発電所をえらぶ" data-position="bottom center"><i
                 class="fa fa-industry"></i></button>
         <button class="ui button right attached" id="show_info_window"
-                onclick="showInfoWindow(state.activeListings[0]);" data-tooltip="Show more information (this needs a translation)." data-position="bottom center"><i
+                onclick="showInfoWindow(state.activeListings[0]);" data-tooltip="くわしく見る" data-position="bottom center"><i
                 class="fa fa-info"></i></button>
-        <button class="ui button right attached" onclick="redo();" data-tooltip="De-select all plants (this needs a translation)." data-position="bottom center"><i class="fa fa-redo-alt"></i></button>
+        <button class="ui button right attached" onclick="redo();" data-tooltip="選択を解除する" data-position="bottom center"><i class="fa fa-redo-alt"></i></button>
         <button class="ui compact labeled icon button right attached" onclick="play(state.existingLayers);"
                 onmouseenter="playOnMouseover()" id="_play_button">
             <i class="play icon" id="play_button"></i>
@@ -115,18 +113,18 @@
     let map = new mapboxgl.Map({
         container: 'mapControls',
         style: style,
-        center: [135.43366015639952, 38.37210580471424],
+        center: [138.41095507873092, 35.9738672175538],
         zoom: 5,
         doubleClickZoom: false,
         dragRotate: false,
         touchZoomRotate: true
     });
-
-    map.addControl(new mapboxgl.NavigationControl(), 'top-left');
     map.addControl(new mapboxgl.ScaleControl({
         maxWidth: 200,
         unit: 'metric'
     }));
+    map.addControl(new mapboxgl.NavigationControl(), 'bottom-left');
+
 
     // Map interactions
     let isSourceLoadedPoints = false;
@@ -250,6 +248,7 @@
                                 let features = map.queryRenderedFeatures(e.point, {layers: ['points']});
                                 if (!features.length) {
                                     console.log('[click] clicked map, but not on a icon. No actions.');
+                                    console.log(e);
                                 } else {
                                     setTimeout(function () {
                                         if (isDBLClick) {
@@ -265,7 +264,7 @@
 
                                             features.forEach(function (f) {
                                                 state.activeClusterIds.add(f.properties.cluster);
-                                                state.activePlantIds.add(f.properties.id.slice(2));
+                                                state.activePlantIds.add(f.properties.id2);
                                                 state.activeNames.push(f.properties.name);
 
                                                 state.activeListings.shift();
@@ -299,8 +298,14 @@
     });
 
 </script>
-</body>
-<script>
 
-</script>
+</body>
+
+
+
+<!--<script>-->
+    <!--setTimeout(function(){-->
+        <!--flyToJP22();-->
+    <!--}, 1000);-->
+<!--</script>-->
 </html>

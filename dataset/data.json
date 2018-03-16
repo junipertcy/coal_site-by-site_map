@@ -1,5 +1,4 @@
-let plants = {
-    'features': [
+[
     {
         "geometry": {
             "coordinates": [
@@ -1276,6 +1275,4 @@ let plants = {
             "annual_nox": 230.5044
         }
     }
-],
-    'type': 'FeatureCollection'
-};
+]

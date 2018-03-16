@@ -10,11 +10,11 @@
 
 .mapboxgl-popup-content {
     position: absolute;
-    right: 10px;
-    top: 15vh;
+    right: 1vw;
+    bottom: 25px;
     padding: 5px 5px 5px;
     width: 360px;
-    z-index: 100;
+    z-index: 100000;
     font-size: 13px;
     border-bottom: 1px solid transparent;
     background-color: white;
@@ -23,48 +23,7 @@
     box-shadow: 5px 5px 5px #ccc;
 }
 
-.mapboxgl-popup-content #table_1 tr {
-    display: table-row;
-    vertical-align: inherit;
-    border-color: inherit;
-    color: #111111;
-    text-align: center;
-}
-
-.mapboxgl-popup-content #table_1 td:first-child {
-    width: 5%;
-    color: #111111;
-    /*text-align: right;*/
-}
-
-.mapboxgl-popup-content #table_1 td {
-    width: 40%;
-    color: #111111;
-    text-align: left;
-    padding: 0em 0.5em;
-}
-
-.mapboxgl-popup-content #table_1 td:last-child {
-    width: 35%;
-}
-
-.mapboxgl-popup-content #table_2 {
-    line-height: 1;
-    width: 100%;
-}
-
-.mapboxgl-popup-content #table_2 td:first-child {
-    text-align: right;
-    width: 40%;
-}
-
-.mapboxgl-popup-content #table_2 td:last-child {
-    text-align: left;
-    padding-left: 60px;
-}
-
 /* Title containers */
-
 .titleContainer {
     position: absolute;
     right: 10px;

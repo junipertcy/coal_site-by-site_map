@@ -19,9 +19,9 @@ function drawLegend(max) {
         .cells(4)
         .orient("vertical")
         .scale(sequentialScale)
-        .title("濃度 (ppm)");
+        .title("濃度 (ppb)");
 
     svg.select(".legendSequential")
         .call(legendSequential);
-    svg.style('right', '5vh');
+    svg.style('right', '1vw');
 }

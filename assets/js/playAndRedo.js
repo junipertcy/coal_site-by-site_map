@@ -84,9 +84,9 @@ function dblClickAll() {
     redo();
     plants.features.forEach(function (f) {
         if (state.activeListings.indexOf(f.properties.name) === -1) {
-            if (state.activePlantIds.has(f.properties.id.slice(2))) {
+            if (state.activePlantIds.has(f.properties.id2)) {
                 state.activeClusterIds.delete(f.properties.cluster);
-                state.activePlantIds.delete(f.properties.id.slice(2));
+                state.activePlantIds.delete(f.properties.id2);
                 let index = 0;
                 state.activeNames.forEach(function (name) {
                     if (name === f.properties.name) {
@@ -98,7 +98,7 @@ function dblClickAll() {
                 });
             } else {
                 state.activeClusterIds.add(f.properties.cluster);
-                state.activePlantIds.add(f.properties.id.slice(2));
+                state.activePlantIds.add(f.properties.id2);
                 state.activeNames.push(f.properties.name);
             }
         }

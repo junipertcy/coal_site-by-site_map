@@ -30,6 +30,14 @@ function flyToStore(currentFeature) {
     });
 }
 
+function flyToJP22() {
+    map.flyTo({
+        center: [139.72, 35.214],
+        zoom: 8
+    });
+}
+
+
 function getKmlAndReturnPromise(id, pollutant) {
     return new Promise(resolve =>
         omnivore.kml('dataset/japan' + id + '_' + pollutant + '_concentration_monthly.kml').on('ready', function (d) {
@@ -101,7 +109,7 @@ async function downloadSource(id, pollutant) {
 }
 
 function createPopUp(currentFeature) {
-    let id = currentFeature.properties.id.slice(2);
+    let id = currentFeature.properties.id2;
     let popUps = document.getElementsByClassName('mapboxgl-popup');
 
     // Check if there is already a popup on the map and if so, remove it
@@ -117,54 +125,53 @@ function createPopUp(currentFeature) {
             currentFeature.properties.name +
             '</div>' +
             '</div>' +
-            '<hr style="border-width: 2px;">' +
+            '<hr style="border-width: 0.75px;">' +
             '<div class="ui grid">' +
             '<div class="six wide column" style="text-align: center; left: 12px;">' +
             '<div class="row">' +
-            "静岡県" +
+            currentFeature.properties.prefecture +
             '</div>' +
-            '<div class="row">' +
+            '<div class="row" style="width: 120px;">' +
             '<div class="ui mini horizontal divided list" style="font-size: 13px;">' +
-              '<div class="item">'+
-                '<i class="fa fa-graduation-cap"><span style="color:transparent;">_</span>13 校</i>' +
+              '<div class="item" id="_fa-graduation-cap">'+
+                '<i class="fa fa-graduation-cap">' +' ' + currentFeature.properties.n_schools_within_10km.toString() +' 校' + '</i>' +
               '</div>' +
-              '<div class="item">' +
-                '<i class="fa fa-hospital"><span style="color:transparent;">–</span>30 院</i>' +
+              '<div class="item" id="_fa-hospital">' +
+                '<i class="fa fa-hospital">' + ' ' + currentFeature.properties.n_hospitals_within_10km.toString() + '院' + '</i>' +
               '</div>' +
             '</div>' +
             '</div>' +
             '</div>' +
-            '<div class="ten wide stretched column">' +
+            '<div class="ten wide stretched column" style="top: 5px;">' +
             '<div class="ui mini three statistics" style="font-size: 12px">' +
 
             '<div class="olive statistic">' +
             '<div class="value">' +
-                30.4 +
+                currentFeature.properties.annual_nox.toFixed(2) +
             '</div>' +
             '<div class="label">' +
-                'NO<sub>2</sub><small> (ppm)</small>' +
+                'NO<sub>x</sub><small> (トン/年)</small>' +
             '</div>' +
             '</div>' +
             '<div class="yellow statistic">' +
             '<div class="value">' +
-                38.2 +  // TODO!
+                currentFeature.properties.annual_sox.toFixed(2) +  // TODO!
             '</div>' +
             '<div class="label">' +
-                'SO<sub>2</sub><small> (ppm)</small>' +
+                'SO<sub>x</sub><small> (トン/年)</small>' +
             '</div>' +
             '</div>' +
             '<div class="brown statistic">' +
             '<div class="value">' +
-                89.3 +  // TODO!
+                currentFeature.properties.annual_pm.toFixed(2) +  // TODO!
             '</div>' +
             '<div class="label">' +
-                'PM<sub>2.5</sub><small> (ppm)</small>' +
+                'PM<sub>2.5</sub><small> (トン/年)</small>' +
             '</div>' +
             '</div>' +
             '</div>' +
             '</div>' +
             '</div>' +
-            '<hr style="border-width: 1px;">' +
             '<div class="ui grid">' +
             '<div class="six wide column">' +
             '<div class="ui secondary vertical pointing menu mini" style="font-size: 12px;">' +
@@ -229,5 +236,7 @@ function createPopUp(currentFeature) {
         $(this).addClass('active');
     });
     d3.selectAll('.ui .item').style('padding', '8px');
+    d3.selectAll('#_fa-graduation-cap').style('padding', '6px 6px 0px 6px');
+    d3.selectAll('#_fa-hospital').style('padding', '6px 6px 0px 6px');
 
 }
