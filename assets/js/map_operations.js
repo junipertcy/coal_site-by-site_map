@@ -121,15 +121,15 @@ function createPopUp(currentFeature) {
         .setLngLat(currentFeature.geometry.coordinates)
         .setHTML(
             '<div class="ui grid">' +
-            '<div class="sixteen wide column" style="text-align: left; left: 14px;">' +
-            currentFeature.properties.name +
+            '<div class="sixteen wide column" style="text-align: left; left: 14px; font-weight: bold;">' +
+            currentFeature.properties.name + ' (' + currentFeature.properties.prefecture + ')' +
             '</div>' +
             '</div>' +
             '<hr style="border-width: 0.75px;">' +
             '<div class="ui grid">' +
             '<div class="six wide column" style="text-align: center; left: 12px;">' +
-            '<div class="row">' +
-            currentFeature.properties.prefecture +
+            '<div class="row" style="width: 140px; font-size: 11px; position: relative; left: -18px;">' +
+            '半径10km圏内の学校と病院' +
             '</div>' +
             '<div class="row" style="width: 120px;">' +
             '<div class="ui mini horizontal divided list" style="font-size: 13px;">' +
@@ -137,14 +137,13 @@ function createPopUp(currentFeature) {
                 '<i class="fa fa-graduation-cap">' +' ' + currentFeature.properties.n_schools_within_10km.toString() +' 校' + '</i>' +
               '</div>' +
               '<div class="item" id="_fa-hospital">' +
-                '<i class="fa fa-hospital">' + ' ' + currentFeature.properties.n_hospitals_within_10km.toString() + '院' + '</i>' +
+                '<i class="fa fa-hospital">' + ' ' + currentFeature.properties.n_hospitals_within_10km.toString() + 'か所' + '</i>' +
               '</div>' +
             '</div>' +
             '</div>' +
             '</div>' +
-            '<div class="ten wide stretched column" style="top: 5px;">' +
-            '<div class="ui mini three statistics" style="font-size: 12px">' +
-
+            '<div class="ten wide stretched column" style="top: 4px; left: -11px;">' +
+            '<div class="ui mini three statistics" style="font-size: 12px; width: 105.5%!important;">' +
             '<div class="olive statistic">' +
             '<div class="value">' +
                 currentFeature.properties.annual_nox.toFixed(2) +
@@ -166,7 +165,7 @@ function createPopUp(currentFeature) {
                 currentFeature.properties.annual_pm.toFixed(2) +  // TODO!
             '</div>' +
             '<div class="label">' +
-                'PM<sub>2.5</sub><small> (トン/年)</small>' +
+                'PM2.5<small> (トン/年)</small>' +
             '</div>' +
             '</div>' +
             '</div>' +
@@ -191,7 +190,7 @@ function createPopUp(currentFeature) {
             '</div>' +
             '<div class="ten wide stretched column">' +
             '<div class="ui attached stacked left aligned green segment" id="segment" style="font-size: 12px;">' +
-            '<p>' + currentFeature.properties.status + ' (' + currentFeature.properties.capacity + ')' + '</p>' +
+            '<p>' + currentFeature.properties.status + ' (' + currentFeature.properties.capacity + ')' + '; ' + '運転開始予定: ' + currentFeature.properties.expected_operation_start_date + '</p>' +
             '</div>' +
             '</div>' +
             '</div>'
@@ -222,7 +221,7 @@ function createPopUp(currentFeature) {
     $('.ui .item').on('click', function () {
         let expr = this.text;
         if (expr === '状況 (最大発電能力)') {
-            d3.select('#segment').text(currentFeature.properties.status + ' (' + currentFeature.properties.capacity + ')');
+            d3.select('#segment').text(currentFeature.properties.status + ' (' + currentFeature.properties.capacity + ')' + '; ' + '運転開始予定: ' + currentFeature.properties.expected_operation_start_date);
         } else if (expr === '親会社／出資者等') {
             d3.select('#segment').text(currentFeature.properties.investors);
         } else if (expr === '企業名／運営会社') {

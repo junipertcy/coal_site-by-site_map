@@ -21,7 +21,7 @@
     <script src='node_modules/d3-interpolate/build/d3-interpolate.min.js'></script>
 
     <script src="assets/js/map_operations.js"></script>
-    <script src='assets/js/coal_plant_listings.js'></script>
+    <script src='assets/js/coal_plant_listings_.js'></script>
     <script src='assets/js/map_style.js'></script>
 
     <link href='assets/css/popup.css' rel='stylesheet'/>
@@ -40,6 +40,7 @@
     <script src='assets/js/drawLegend.js'></script>
 </head>
 <body>
+
 
 <div style="position: absolute; top: 1vh; right: 1vw; z-index: 10000; background: white; padding: 5px; border-radius: 5px;"
      id="picker">
@@ -215,10 +216,10 @@
                                 } else {
                                     setTimeout(function(){
                                         features.forEach(function (f) {
-                                            if (state.activePlantIds.has(f.properties.id.slice(2))) {
+                                            if (state.activePlantIds.has(f.properties.id2)) {
                                                 // Delete the selection
                                                 state.activeClusterIds.delete(f.properties.cluster);
-                                                state.activePlantIds.delete(f.properties.id.slice(2));
+                                                state.activePlantIds.delete(f.properties.id2);
                                                 let index = 0;
                                                 state.activeNames.forEach(function (name) {
                                                     if (name === f.properties.name) {
@@ -231,7 +232,7 @@
                                             } else {
                                                 // Add new selection
                                                 state.activeClusterIds.add(f.properties.cluster);
-                                                state.activePlantIds.add(f.properties.id.slice(2));
+                                                state.activePlantIds.add(f.properties.id2);
                                                 state.activeNames.push(f.properties.name);
 
                                                 state.activeListings.shift();
