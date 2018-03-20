@@ -14,12 +14,16 @@ function drawLegend(max) {
         .attr("class", "legendSequential")
         .attr("transform", "translate(10,15)");
 
+    let conc_unit = "濃度 (ppb)";
+    if (state._pollutant === "pm25") {
+        conc_unit = "濃度 (μg/m³)";
+    }
     let legendSequential = d3.legendColor()
         .shapeWidth(30)
         .cells(4)
         .orient("vertical")
         .scale(sequentialScale)
-        .title("濃度 (ppb)");
+        .title(conc_unit);
 
     svg.select(".legendSequential")
         .call(legendSequential);
