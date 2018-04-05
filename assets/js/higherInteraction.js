@@ -1,26 +1,5 @@
-let isDBLClick = false;
-let state = {
-    is_play: false,
-    isToggleOpen: true,
-    isPollutantSelected: false,
-    month: 0,
-    _layerName: '',
-    _id: '',
-    _pollutant: '',
-    availableSources: {
-        "no2": new Set(),
-        "pm25": new Set(),
-        "so2": new Set()
-    },
-    existingLayers: new Set(),
-    activeClusterIds: new Set(),
-    activePlantIds: new Set(),
-    activeNames: [],
-    sizeActiveClusterIds: 0,  // ac-hoc usage for the watch function
-    maxConcentrationDict: {},
-    activeListings: [],
-    maxValue: {}
-};
+
+
 
 async function downloadSources(activeLayers) {
     if (state._pollutant === "") {
@@ -85,8 +64,6 @@ watch(state, ["_pollutant"], function () {
         downloadSources(activeLayers).then(function(){
             showActiveLayers(activeLayers);
             $('#_play_button').removeClass('loading');
-
-
             d3.select('body').style('cursor', 'default');
             d3.select('.mapboxgl-canvas').style('cursor', '');
             // d3.select('#select_all_plants').style('display', 'block');

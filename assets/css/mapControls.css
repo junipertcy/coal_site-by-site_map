@@ -61,7 +61,7 @@
 .legend .bar {
     height: 15px;
     width: 100px;
-    background: linear-gradient(to right, #FCA107, #7F3121);
+    background: linear-gradient(to right, #fdbb84, #7f0000);
 }
 
 .map-overlay input {
@@ -82,6 +82,6 @@
     position: absolute;
     bottom: 5vh;
     z-index: 1000;
-    width: 80px;
+    width: 110px;
     height: 105px;
 }

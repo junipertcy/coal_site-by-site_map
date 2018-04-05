@@ -77,11 +77,11 @@ function getKmlAndReturnPromise(id, pollutant) {
                     d.properties.month = 12;  // always present
                 }
                 try {
-                    let color = d3.interpolateLab("#ec7014", "#662506");
+                    let color = d3.interpolateLab("#fdbb84", "#7f0000");
                     // console.log('d.properties.name =', d.properties.name);
                     d.properties.color = color(parseFloat(d.properties.name.split(" - ")[0]));
-                    if (parseFloat(d.properties.name.split(" - ")) > maxConcentration) {
-                        maxConcentration = parseFloat(d.properties.name.split(" - "));
+                    if (parseFloat(d.properties.name.split(" - ")[1]) > maxConcentration) {
+                        maxConcentration = parseFloat(d.properties.name.split(" - ")[1]);
                     }
                 } catch (e) {
                     console.log(d);
