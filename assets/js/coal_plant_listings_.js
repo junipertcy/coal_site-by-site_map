@@ -1,4 +1,94 @@
-var plants = {
+let canceled_plants = {
+    'features': [{
+        "geometry": {
+            "coordinates": [
+                141.023,
+                38.275
+            ],
+            "type": "Point"
+        },
+        "properties": {
+            "num": 44,
+            "cluster": 5,
+            "id2": 50,
+            "capacity": "11.2 [万kW]",
+            "name": "仙台高松発電所",
+            "plant_name": "仙台高松発電所（仮）",
+            "prefecture": "宮城県",
+            "operator": "四国電力",
+            "investors": "四国電力、住友商事",
+            "fuels_used": "バイオマス混焼",
+            "status": "稼働中",
+            "expected_operation_start_date": "2017年 10月 1日",
+            "n_schools_within_10km": 32,
+            "n_hospitals_within_10km": 4,
+            "annual_co2": 67.2,
+            "annual_pm": 14.2079,
+            "annual_sox": 156.1494,
+            "annual_nox": 230.5044
+        }
+    }, {
+        "geometry": {
+            "coordinates": [
+                134.7621,
+                34.7536
+            ],
+            "type": "Point"
+        },
+        "properties": {
+            "num": 34,
+            "cluster": 25,
+            "id2": 31,
+            "capacity": "60.0 [万kW]",
+            "name": "高砂発電所新1号機",
+            "plant_name": "高砂発電所新1号機",
+            "prefecture": "兵庫県",
+            "operator": "電源開発",
+            "investors": "電源開発",
+            "fuels_used": "石炭",
+            "status": "アセスメント実施中",
+            "expected_operation_start_date": "2021年度",
+            "n_schools_within_10km": 43,
+            "n_hospitals_within_10km": 3,
+            "annual_co2": 405,
+            "annual_pm": 55.4454,
+            "annual_sox": 750.3284,
+            "annual_nox": 640.2901
+        }
+    }, {
+        "geometry": {
+            "coordinates": [
+                134.7626,
+                34.7527
+            ],
+            "type": "Point"
+        },
+        "properties": {
+            "num": 35,
+            "cluster": 25,
+            "id2": 43,
+            "capacity": "60.0 [万kW]",
+            "name": "高砂発電所新2号機",
+            "plant_name": "高砂発電所新2号機",
+            "prefecture": "兵庫県",
+            "operator": "電源開発",
+            "investors": "電源開発",
+            "fuels_used": "石炭",
+            "status": "アセスメント実施中",
+            "expected_operation_start_date": "2027年度",
+            "n_schools_within_10km": 43,
+            "n_hospitals_within_10km": 3,
+            "annual_co2": 405,
+            "annual_pm": 55.4454,
+            "annual_sox": 750.3284,
+            "annual_nox": 640.2901
+        }
+    }],
+    'type': 'FeatureCollection'
+};
+
+
+let plants = {
     'features': [
     {
         "geometry": {
@@ -222,8 +312,8 @@ var plants = {
             "operator": "名南共同エネルギー株式会社",
             "investors": "名港海運（49.75%）、 西華産業（49.75%）、 日本エネルギーパートナーズ（0.5%）",
             "fuels_used": "石炭",
-            "status": "試運転中",
-            "expected_operation_start_date": "2017年 10月 1日",
+            "status": "運転中",
+            "expected_operation_start_date": "2018年 2月 (運転中)",
             "n_schools_within_10km": 42,
             "n_hospitals_within_10km": 1,
             "annual_co2": 18.7,
@@ -280,8 +370,8 @@ var plants = {
             "operator": "日本製紙石巻エネルギーセンター株式会社",
             "investors": "日本製紙（70%）、 三菱商事（30%）",
             "fuels_used": "バイオマス混焼",
-            "status": "試運転中",
-            "expected_operation_start_date": "2018年 3月",
+            "status": "運転中",
+            "expected_operation_start_date": "2018年 3月 16日 (運転中)",
             "n_schools_within_10km": 23,
             "n_hospitals_within_10km": 6,
             "annual_co2": 89.4,
@@ -420,13 +510,13 @@ var plants = {
             "id2": 15,
             "capacity": "11.2 [万kW]",
             "name": "エム・セテック相馬工場内発電所",
-            "plant_name": "エム・セテック相馬工場内発電所",
+            "plant_name": "相馬石炭・バイオマス発電所",
             "prefecture": "福島県",
             "operator": "相馬エネルギーパーク合同会社",
             "investors": "相馬エネルギーパーク合同会社",
             "fuels_used": "バイオマス混焼",
-            "status": "建設中",
-            "expected_operation_start_date": "2018年 3月",
+            "status": "運転中",
+            "expected_operation_start_date": "2018年 4月 1日 (運転中)",
             "n_schools_within_10km": 0,
             "n_hospitals_within_10km": 0,
             "annual_co2": 67.2,
@@ -815,35 +905,6 @@ var plants = {
     {
         "geometry": {
             "coordinates": [
-                134.7621,
-                34.7536
-            ],
-            "type": "Point"
-        },
-        "properties": {
-            "num": 34,
-            "cluster": 25,
-            "id2": 31,
-            "capacity": "60.0 [万kW]",
-            "name": "高砂発電所新1号機",
-            "plant_name": "高砂発電所新1号機",
-            "prefecture": "兵庫県",
-            "operator": "電源開発",
-            "investors": "電源開発",
-            "fuels_used": "石炭",
-            "status": "アセスメント実施中",
-            "expected_operation_start_date": "2021年度",
-            "n_schools_within_10km": 43,
-            "n_hospitals_within_10km": 3,
-            "annual_co2": 405,
-            "annual_pm": 55.4454,
-            "annual_sox": 750.3284,
-            "annual_nox": 640.2901
-        }
-    },
-    {
-        "geometry": {
-            "coordinates": [
                 135.2521,
                 34.7053
             ],
@@ -1134,35 +1195,6 @@ var plants = {
     {
         "geometry": {
             "coordinates": [
-                134.7626,
-                34.7527
-            ],
-            "type": "Point"
-        },
-        "properties": {
-            "num": 35,
-            "cluster": 25,
-            "id2": 43,
-            "capacity": "60.0 [万kW]",
-            "name": "高砂発電所新2号機",
-            "plant_name": "高砂発電所新2号機",
-            "prefecture": "兵庫県",
-            "operator": "電源開発",
-            "investors": "電源開発",
-            "fuels_used": "石炭",
-            "status": "アセスメント実施中",
-            "expected_operation_start_date": "2027年度",
-            "n_schools_within_10km": 43,
-            "n_hospitals_within_10km": 3,
-            "annual_co2": 405,
-            "annual_pm": 55.4454,
-            "annual_sox": 750.3284,
-            "annual_nox": 640.2901
-        }
-    },
-    {
-        "geometry": {
-            "coordinates": [
                 130.8306,
                 33.9471
             ],
@@ -1202,7 +1234,7 @@ var plants = {
             "cluster": 7,
             "id2": 45,
             "capacity": "100.0 [万kW]",
-            "name": "発電所名不明",
+            "name": "発電所名不明（福島県）",
             "plant_name": "発電所名不明",
             "prefecture": "福島県",
             "operator": "相馬共同火力発電",
@@ -1250,30 +1282,30 @@ var plants = {
     {
         "geometry": {
             "coordinates": [
-                141.023,
-                38.275
+                131.792376,
+                34.034382
             ],
             "type": "Point"
         },
         "properties": {
-            "num": 44,
-            "cluster": 5,
-            "id2": 50,
-            "capacity": "11.2 [万kW]",
-            "name": "仙台高松発電所",
-            "plant_name": "仙台高松発電所（仮）",
-            "prefecture": "宮城県",
-            "operator": "四国電力",
-            "investors": "四国電力、 住友商事",
+            "num": 99,
+            "cluster": 99,
+            "id2": 99,
+            "capacity": "30.0 [万kW]",
+            "name": "トクヤマ東発電所第3号",
+            "plant_name": "トクヤマ東発電所第3号",
+            "prefecture": "山口県",
+            "operator": "TKE3株式会社",
+            "investors": "株式会社トクヤマ、丸紅株式会社、東京センチュリー株式会社",
             "fuels_used": "バイオマス混焼",
-            "status": "稼働中",
-            "expected_operation_start_date": "2017年 10月 1日",
-            "n_schools_within_10km": 32,
-            "n_hospitals_within_10km": 4,
-            "annual_co2": 67.2,
-            "annual_pm": 14.2079,
-            "annual_sox": 156.1494,
-            "annual_nox": 230.5044
+            "status": "建設中",
+            "expected_operation_start_date": "2022年 4月",
+            "n_schools_within_10km": 'n/a',
+            "n_hospitals_within_10km": 'n/a',
+            "annual_co2": 0.,
+            "annual_pm": 0.,
+            "annual_sox": 0.,
+            "annual_nox": 0.
         }
     }
 ],

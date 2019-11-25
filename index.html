@@ -28,11 +28,10 @@
     <link href='assets/css/mapControls.css' rel='stylesheet'/>
     <link href="assets/css/Font-Awesome/web-fonts-with-css/css/fontawesome-all.min.css" rel="stylesheet">
 
-    <link href='node_modules/mapbox-gl/dist/mapbox-gl.css' rel='stylesheet'/>
 
     <script src='assets/js/semantic/dist/semantic.min.js'></script>
-
     <link href='assets/js/semantic/dist/semantic.min.css' rel='stylesheet'>
+    <link href='node_modules/mapbox-gl/dist/mapbox-gl.css' rel='stylesheet'/>
 
 
 </head>
@@ -134,7 +133,7 @@
         document.getElementById('month').textContent = months[month];
     }
 
-    mapboxgl.accessToken = 'pk.eyJ1IjoianVuaXBlcnRjeSIsImEiOiJvOFg5WFVjIn0.7NDB1oOLpq3A5qO7vLaQSA';
+    mapboxgl.accessToken = 'pk.eyJ1IjoianVuaXBlcnRjeSIsImEiOiJjampscjE0c24wOGl3M3ZxZmMyMzlqYTM0In0.cIRNQqr-ygY34X7IrRygyQ';
 
     let map = new mapboxgl.Map({
         container: 'mapControls',
@@ -163,6 +162,20 @@
                 map.loadImage('assets/css/img/factoryTransp3_selected.png', function (error, image) {
                     if (error) throw error;
                     map.addImage('industry', image);
+                    map.addLayer({
+                        "id": "points2",
+                        "type": "symbol",
+                        "interactive": true,
+                        "source": {
+                            "type": "geojson",
+                            "data": canceled_plants
+                        },
+                        "layout": {
+                            "icon-size": 0.18,
+                            'icon-ignore-placement': true,
+                            'icon-allow-overlap': true
+                        }
+                    });
                     map.addLayer({
                         "id": "points",
                         "type": "symbol",
@@ -707,7 +720,6 @@
             d3.select('#_play_button').style('cursor', 'pointer');
         }
     }
-
 
     function redo() {
         if (state.is_play) {
